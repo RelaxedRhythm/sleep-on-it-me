@@ -60,6 +60,11 @@ const NoteTaking = () => {
       key: "Key",
       description: "Description",
     },
+    {
+      id: 2,
+      key: "Key",
+      description: "Description",
+    },
   ]);
 
   const today = new Date().toDateString();

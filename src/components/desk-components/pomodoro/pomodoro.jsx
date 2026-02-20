@@ -30,38 +30,15 @@ export default function Pomodoro() {
     return () => clearInterval(interval);
   }, [isPaused, isStarted, timeLeft]);
 
-
-  useEffect(() => {
-    if (timeLeft !== 0) return;
-
-    playSound();
-    if (mode === "study") {
-      setPomodoros(prev => {
-        const next = prev + 1;
-
-        if (next === 4) {
-          setMode("longBreak");
-          setTimeLeft(timers.longBreak);
-          return 0;
-        }
-
-        setMode("shortBreak");
-        setTimeLeft(timers.shortBreak);
-        return next;
-      });
-    }else{
-      setMode("study");
-      setTimeLeft(timers.study)
-    }
-  }
-, [timeLeft]);
-
-  const playSound=()=>{
+const playSound=()=>{
       if(!sound) return;
       const audio=audioRef;
       audio.current.play();
   }
 
+  
+
+  
 
   const reset = () => {
     setIsStarted(false);
