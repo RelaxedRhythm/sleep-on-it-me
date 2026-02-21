@@ -1,4 +1,3 @@
-import { timers } from "@/library/pomodoro-timer"
 import { GiSoundOn,GiSoundOff } from "react-icons/gi"
 export function Controls({ onReset, onPause, onStart,onSound,sound, isStarted,isPaused }) {
 

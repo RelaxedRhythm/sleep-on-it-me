@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { TimerDisplay } from "./timeDisplay";
 import { Controls } from "./controls";
-import ToDo from "./to-do";
 
 export default function Pomodoro() {
   const timers = {
@@ -15,7 +14,8 @@ export default function Pomodoro() {
   const [mode, setMode] = useState("study"); // shortbreak || longbreak
   const [timeLeft, setTimeLeft] = useState(timers.study); //to update timer
   const [isPaused, setIsPaused] = useState(false); // see if timer paused
-  const [pomodoro, setPomodoros] = useState(0); //count number of sessions
+  const [pomodoro, setPomodoros] = useState(0); //count number of pomodoro
+  const [session, setSessions] = useState(0); // count number of sessions
   const [isStarted, setIsStarted] = useState(false);
   const [sound, setSound] = useState(true);
 
@@ -74,7 +74,6 @@ export default function Pomodoro() {
           isPaused={isPaused}
           sound={sound}
         />
-        <ToDo />
       </div>
     </>
   );
