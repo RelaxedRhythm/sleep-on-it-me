@@ -1,6 +1,6 @@
 import NoteTaking from "@/components/desk-components/note-taking";
 import NotebookSummary from "@/components/desk-components/summary";
-import Pomodoro from "@/components/desk-components/pomodoro/pomodoro";
+import Pomodoro from "@/components/desk-components/pomodoro";
 
 export const metadata = {
   title: "Desk",
