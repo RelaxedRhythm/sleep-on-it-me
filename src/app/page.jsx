@@ -78,6 +78,7 @@ export const metadata = {
   title: "Sleep on it! | Login",
   description: "The best productive learning app on the market",
 };
+
 export default function Home() {
   return (
     <main className="flex h-[96vh] items-center justify-center">
