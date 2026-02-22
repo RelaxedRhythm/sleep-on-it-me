@@ -1,15 +1,31 @@
 import "./globals.css";
+import { fetchUser, makeUser } from "@/library/actions";
 
-function Login() {
+// async function handleLogIn(e) {
+//   "use server";
+//   // console.log(e);
+//   // fetchUser(username, password)
+// }
+// async function handleSignUp(data) {
+//   "use server";
+//   // console.log(data);
+// }
+
+async function Login() {
+  "use server";
+
   return (
-    <form className="m-[20] flex w-100 flex-col justify-center gap-4 rounded-sm border border-gray-500 p-4">
+    <form
+      action={fetchUser}
+      className="m-[20] flex w-100 flex-col justify-center gap-4 rounded-sm border border-gray-500 p-4"
+    >
       <p className="text-center text-3xl">Sign In</p>
       <p className="text-center text-sm text-gray-500">
         Enter your credentials to continue
       </p>
       <input
         className="m-[8] rounded-sm border border-gray-500 p-2"
-        name="User"
+        name="username"
         placeholder="username"
         type="text"
       />
@@ -25,9 +41,13 @@ function Login() {
   );
 }
 
-function SignUp() {
+async function SignUp() {
+  "use server";
   return (
-    <form className="m-[20] flex w-100 flex-col justify-center gap-4 rounded-sm border border-gray-500 p-4">
+    <form
+      action={makeUser}
+      className="m-[20] flex w-100 flex-col justify-center gap-4 rounded-sm border border-gray-500 p-4"
+    >
       <p className="text-center text-3xl">Sign Up</p>
       <p className="text-center text-sm text-gray-500">
         Make your new account!
@@ -35,36 +55,41 @@ function SignUp() {
       <input
         className="m-[8] rounded-sm border border-gray-500 p-2"
         placeholder="First Name"
+        required
         name="fname"
         type="text"
       />
       <input
         className="m-[8] rounded-sm border border-gray-500 p-2"
         name="lname"
+        required
         type="text"
         placeholder="Last Name"
       />
       <input
         className="m-[8] rounded-sm border border-gray-500 p-2"
-        name="Username"
+        name="username"
+        required
         type="text"
         placeholder="username"
       />
       <input
         className="m-[8] rounded-sm border border-gray-500 p-2"
         name="mail"
+        required
         type="email"
         placeholder="you@example.com"
       />
       <input
         className="m-[8] rounded-sm border border-gray-500 p-2"
-        name="Password"
+        name="password"
+        required
         type="password"
         placeholder="Password"
       />
       <input
         className="m-[8] rounded-sm border border-gray-500 p-2"
-        name="Password"
+        name="password"
         type="password"
         placeholder="Re-enter password"
       />
@@ -80,6 +105,7 @@ export const metadata = {
 };
 
 export default function Home() {
+  "use client";
   return (
     <main className="flex h-[96vh] items-center justify-center">
       {/* <div>Hello world!</div> */}

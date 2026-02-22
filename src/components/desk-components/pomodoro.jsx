@@ -2,12 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { VolumeX, Volume2 } from "lucide-react";
-function Controls({
-  onReset,
-  onStart,
-  isStarted,
-  isPaused,
-}) {
+
+import ToDo from "./to-do";
+function Controls({ onReset, onStart, isStarted, isPaused }) {
   return (
     <div className=" ">
       {isStarted ? (
@@ -83,7 +80,7 @@ function TimerDisplay({
         </p>
       </div>
 
-      <audio ref={audioRef} src="/bell.mp3" preload="auto"></audio>
+      <audio ref={audioRef} src="./bell.mp3" preload="auto" />
     </div>
   );
 }
@@ -170,26 +167,25 @@ export default function Pomodoro() {
   };
 
   return (
-    <>
-      <div className="min-w-80 rounded-xl bg-stone-200 p-4">
-        <TimerDisplay
-          timeLeft={timeLeft}
-          mode={mode}
-          pomodoro={pomodoro}
-          session={session}
-          audioRef={audioRef}
-          sound={sound}
-          onSound={onSound}
-        />
-        <Controls
-          onReset={reset}
-          onStart={start}
-          onSound={onSound}
-          isStarted={isStarted}
-          isPaused={isPaused}
-          sound={sound}
-        />
-      </div>
-    </>
+    <div className="min-w-80 rounded-xl bg-stone-200 p-4">
+      <TimerDisplay
+        timeLeft={timeLeft}
+        mode={mode}
+        pomodoro={pomodoro}
+        session={session}
+        audioRef={audioRef}
+        sound={sound}
+        onSound={onSound}
+      />
+      <Controls
+        onReset={reset}
+        onStart={start}
+        onSound={onSound}
+        isStarted={isStarted}
+        isPaused={isPaused}
+        sound={sound}
+      />
+      <ToDo />
+    </div>
   );
 }
