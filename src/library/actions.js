@@ -35,7 +35,10 @@ async function fetchUser(fd) {
 }
 
 // reading from db
-async function fetchTodo() {}
+async function fetchTodo() {
+  console.log("hello");
+}
+fetchTodo();
 async function fetchBooks() {}
 async function fetchNotes() {}
 
