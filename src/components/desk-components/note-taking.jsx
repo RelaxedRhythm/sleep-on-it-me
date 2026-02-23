@@ -57,7 +57,6 @@ const CornellNoteTaking = () => {
   };
 
   const handleKVPDelete = (id) => {
-    console.log(id);
     setCornellNote((note) => ({
       ...note,
       kvp: note.kvp.filter((note) => note.id !== id),
@@ -117,7 +116,7 @@ const CornellNoteTaking = () => {
         </button>
         <button
           className="w-1/2 rounded-xl bg-blue-400 p-5 text-lg font-semibold tracking-wide text-blue-50 hover:cursor-pointer"
-          onDelete={handleCornellNoteSave}
+          onClick={handleCornellNoteSave}
         >
           Save
         </button>
