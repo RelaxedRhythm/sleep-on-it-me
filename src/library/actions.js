@@ -35,14 +35,39 @@ async function fetchUser(fd) {
 }
 
 // reading from db
-async function fetchTodo() {}
+async function fetchTodo() {
+    const tasks= await client.query("SELECT id, task,status FROM to_do;");
+    return tasks.rows;
+}
 async function fetchBooks() {}
 async function fetchNotes() {}
 
 // write to db
 async function writeBooks() {}
-async function writeTodo() {}
+async function writeTodo(tasks) {
+  tasks.map(async (task)=>{
+    const name=task.name;
+    const status=task.status;
+
+    // if()
+
+    await client.query("INSERT INTO to_do (task,status) values($1,$2);",[name,status]);
+  })
+  
+}
 async function writeNotes() {}
+
+async function deleteTodos(id){
+    const deletedTask=await client.query("SELECT * FROM to_do WHERE id = $1;",[id]);
+    
+    if(deletedTask.rowCount===0){
+      console.log("error: cant delete ....");
+      return
+    }
+      
+    await client.query("DELETE FROM to_do where id=$1",[id]);
+    console.log("deletion success");
+}
 
 export {
   makeUser,
@@ -53,4 +78,5 @@ export {
   writeBooks,
   writeNotes,
   writeTodo,
+  deleteTodos,
 };
