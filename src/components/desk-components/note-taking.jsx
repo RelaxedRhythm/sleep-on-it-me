@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
-const Note = ({ cue, definition }) => {
+const Note = ({ cue, definition, onDelete }) => {
   return (
-    <div className="flex gap-2">
+    <div className="group relative flex gap-2 overflow-hidden rounded-xl ring-red-400 hover:ring-2">
       <textarea
         className="w-1/3 rounded-xl bg-stone-100 p-5"
         type="text"
@@ -15,6 +15,13 @@ const Note = ({ cue, definition }) => {
         type="text"
         placeholder={definition}
       />
+      <button
+        onClick={onDelete}
+        type="button"
+        className="absolute right-0 hidden h-full w-10 items-center justify-center bg-red-400 text-red-50 group-hover:flex hover:cursor-pointer"
+      >
+        <Trash2 />
+      </button>
     </div>
   );
 };
@@ -22,7 +29,7 @@ const Note = ({ cue, definition }) => {
 const CornellNoteTaking = () => {
   const today = new Date().toDateString();
 
-  const [cornellNote, addCornellNote] = useState({
+  const [cornellNote, setCornellNote] = useState({
     title: "",
     kvp: [
       {
@@ -36,7 +43,7 @@ const CornellNoteTaking = () => {
 
   const handleKVPAdd = () => {
     // console.log("note added");
-    addCornellNote({
+    setCornellNote({
       ...cornellNote,
       kvp: [
         ...cornellNote.kvp,
@@ -48,6 +55,15 @@ const CornellNoteTaking = () => {
       ],
     });
   };
+
+  const handleKVPDelete = (id) => {
+    console.log(id);
+    setCornellNote((note) => ({
+      ...note,
+      kvp: note.kvp.filter((note) => note.id !== id),
+    }));
+  };
+
   const handleCornellNoteSave = () => {
     console.log(cornellNote);
   };
@@ -66,7 +82,12 @@ const CornellNoteTaking = () => {
 
       {/* KVP */}
       {cornellNote.kvp.map((note) => (
-        <Note key={note.id} cue={note.cue} definition={note.definition} />
+        <Note
+          key={note.id}
+          cue={note.cue}
+          definition={note.definition}
+          onDelete={() => handleKVPDelete(note.id)}
+        />
       ))}
 
       {/* add KVP */}
@@ -96,7 +117,7 @@ const CornellNoteTaking = () => {
         </button>
         <button
           className="w-1/2 rounded-xl bg-blue-400 p-5 text-lg font-semibold tracking-wide text-blue-50 hover:cursor-pointer"
-          onClick={handleCornellNoteSave}
+          onDelete={handleCornellNoteSave}
         >
           Save
         </button>
