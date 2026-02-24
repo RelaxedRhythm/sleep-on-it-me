@@ -61,7 +61,7 @@ export default function ToDo() {
   // const items=fetchTodo
   return (
     <div>
-      <ul>
+      <ul className="h-11/13 overflow-y-scroll border-t-2 border-b-2 border-stone-300 bg-white py-4">
         {tasks.map((task) => (
           <li
             key={task.id}
