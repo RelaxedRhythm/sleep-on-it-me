@@ -7,7 +7,7 @@ async function BookShelf() {
 
   return (
     <div className="flex h-full flex-col text-lg">
-      <h2 className="flex items-center gap-2 p-4 text-stone-500">
+      <h2 className="flex items-center gap-2 p-4 text-stone-400">
         <Library /> Book shelf
       </h2>
       <div className="flex h-full flex-col overflow-y-scroll p-4">

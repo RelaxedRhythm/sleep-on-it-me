@@ -1,24 +1,24 @@
 "use client";
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { NotepadTextDashed, Plus, Trash2 } from "lucide-react";
 
 const Note = ({ cue, definition, onDelete }) => {
   return (
-    <div className="group relative flex gap-2 overflow-hidden rounded-xl ring-red-400 hover:ring-2">
+    <div className="group relative flex items-start gap-2 rounded-xl ring-red-400 hover:ring-2">
       <textarea
-        className="w-1/3 rounded-xl bg-stone-100 p-5"
+        className="field-sizing-content w-1/3 rounded-xl bg-sky-100 p-5 outline-none focus:ring-2 focus:ring-sky-400"
         type="text"
         placeholder={cue}
       />
       <textarea
-        className="w-2/3 rounded-xl bg-stone-100 p-5"
+        className="field-sizing-content w-2/3 rounded-xl bg-sky-100 p-5 outline-none focus:ring-2 focus:ring-sky-400"
         type="text"
         placeholder={definition}
       />
       <button
         onClick={onDelete}
         type="button"
-        className="absolute right-0 hidden h-full w-10 items-center justify-center bg-red-400 text-red-50 group-hover:flex hover:cursor-pointer"
+        className="absolute -left-7 hidden h-full w-8 items-center justify-center rounded-l-xl bg-red-400 text-red-50 group-hover:flex hover:cursor-pointer"
       >
         <Trash2 />
       </button>
@@ -68,12 +68,15 @@ const CornellNoteTaking = () => {
   };
 
   return (
-    <main className="max-w-1/2 space-y-2 text-stone-800">
+    <main className="max-w-1/2 min-w-1/2 space-y-2 text-stone-700">
+      <h2 className="flex items-center gap-2 font-semibold tracking-wide text-stone-400">
+        <NotepadTextDashed /> Make your Cornell note here.
+      </h2>
       {/* Head of the note */}
-      <div className="flex justify-between rounded-xl bg-stone-100 p-5">
+      <div className="flex justify-between rounded-xl bg-sky-200 p-5">
         <div className="w-1/3">{today}</div>
         <input
-          className="w-2/3 font-semibold tracking-wide"
+          className="w-2/3 font-semibold tracking-wide outline-none"
           placeholder="Title"
           type="text"
         />
@@ -101,7 +104,7 @@ const CornellNoteTaking = () => {
       {/* Summary */}
       <textarea
         required
-        className="h-70 w-full rounded-xl bg-stone-100 p-5"
+        className="field-sizing-content w-full rounded-xl bg-sky-100 p-5 outline-none focus:ring-2 focus:ring-sky-400"
         placeholder="Summarize here..."
         type="text"
       />
