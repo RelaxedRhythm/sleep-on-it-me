@@ -1,6 +1,10 @@
+import { Clock3, NotepadText } from "lucide-react";
+import Image from "next/image";
+
 const Note = () => {
   return (
-    <div className="rounded-sm bg-green-500 px-4 py-1 hover:cursor-pointer">
+    <div className="flex items-center gap-2 rounded-sm bg-orange-400 px-4 py-1 hover:cursor-pointer hover:bg-orange-300 hover:shadow">
+      <NotepadText />
       Note
     </div>
   );
@@ -8,10 +12,13 @@ const Note = () => {
 
 const Pomodoro = ({ children }) => {
   return (
-    <div className="space-y-4 rounded-md border-2 border-green-500 bg-green-300 pb-4">
-      <h3 className="bg-green-500 p-2 text-center font-semibold tracking-wide">
-        Pomodoro
-      </h3>
+    <div className="space-y-4 rounded-md border-2 border-orange-400 bg-orange-200 pb-4 text-orange-50">
+      <div className="flex items-center justify-center gap-2 bg-orange-400 p-2">
+        <div className="relative size-6 object-fill">
+          <Image src="/tomato.png" fill alt="tomato" sizes="24px" />
+        </div>
+        <h3 className="font-semibold tracking-wide">Pomodoro</h3>
+      </div>
       <div className="flex flex-col gap-2 px-4">{children}</div>
     </div>
   );
@@ -19,36 +26,29 @@ const Pomodoro = ({ children }) => {
 
 const Session = ({ children }) => {
   return (
-    <div className="px-4">
-      <h2 className="w-1/2 rounded-md bg-orange-400 py-1 text-center">
-        Session
+    <div className="">
+      <h2 className="flex w-1/2 items-center justify-center gap-2 rounded-md bg-lime-500 px-2 py-1 text-lime-50">
+        <Clock3 size={18} /> Session
       </h2>
-      <div className="flex flex-col gap-2">{children}</div>
+      <div className="flex flex-col gap-2 px-4">{children}</div>
     </div>
   );
 };
 
 const Notes = () => {
   return (
-    <div className="bg-stone-700 py-4 text-white">
-      <Session>
-        <Pomodoro>
-          <Note />
-          <Note />
-          <Note />
-        </Pomodoro>
-
-        {/* {data.map((note) => (
-          <Note
-            key={note.id}
-            
-            onClick={() => onSelect(note.title)}
-          >
-            {note.title}
-          </div>
-        ))} */}
-      </Session>
-    </div>
+    <>
+      <div className="mb-4 h-10 rounded-b-lg bg-sky-500"></div>
+      <div className="font-semibold">
+        <Session>
+          <Pomodoro>
+            <Note />
+            <Note />
+            <Note />
+          </Pomodoro>
+        </Session>
+      </div>
+    </>
   );
 };
 

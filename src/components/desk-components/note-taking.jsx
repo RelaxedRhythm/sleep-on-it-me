@@ -92,7 +92,7 @@ const CornellNoteTaking = () => {
       {/* add KVP */}
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 p-4 font-semibold tracking-wide text-green-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-500 p-4 font-semibold tracking-wide text-lime-50 hover:cursor-pointer"
         onClick={handleKVPAdd}
       >
         <Plus />
@@ -115,7 +115,7 @@ const CornellNoteTaking = () => {
           New Cornell Note
         </button>
         <button
-          className="w-1/2 rounded-xl bg-blue-400 p-5 text-lg font-semibold tracking-wide text-blue-50 hover:cursor-pointer"
+          className="w-1/2 rounded-xl bg-sky-500 p-5 text-lg font-semibold tracking-wide text-sky-50 hover:cursor-pointer"
           onClick={handleCornellNoteSave}
         >
           Save
