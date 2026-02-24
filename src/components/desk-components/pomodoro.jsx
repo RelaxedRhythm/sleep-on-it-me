@@ -8,17 +8,17 @@ function Controls({ onReset, onStart, isStarted, isPaused }) {
   return (
     <div className=" ">
       {isStarted ? (
-        <div className="flex justify-between">
+        <div className="flex gap-4">
           {" "}
           <button
             onClick={onReset}
-            className="mt-3 w-32 rounded-xl bg-orange-400 p-3 text-lg font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
+            className="mt-3 w-full rounded-xl bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
           >
             Reset
           </button>
           <button
             onClick={onStart}
-            className="mt-3 w-32 rounded-xl bg-orange-400 p-3 text-lg font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
+            className="mt-3 w-full rounded-xl bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
           >
             {!isPaused ? "Pause" : "Resume"}
           </button>
@@ -27,7 +27,7 @@ function Controls({ onReset, onStart, isStarted, isPaused }) {
         <div className="flex justify-center">
           <button
             onClick={onStart}
-            className="mt-3 w-36 rounded-lg bg-orange-400 p-3 text-lg font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
+            className="mt-3 w-full rounded-lg bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
           >
             Start
           </button>
