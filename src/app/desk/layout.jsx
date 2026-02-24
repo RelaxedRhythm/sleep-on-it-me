@@ -1,5 +1,4 @@
 import SidePanel from "@/components/desk-components/side-navigation-panels";
-import CoverNotebook from "@/components/desk-components/books/notebook-cover";
 import BookShelf from "@/components/desk-components/books/book-shelf";
 import Account from "@/components/desk-components/account";
 import Notes from "@/components/desk-components/notes/notes";
@@ -9,8 +8,8 @@ const DeskLayout = ({ children }) => {
   return (
     <div className="flex h-screen w-full">
       <div className="w-2/10">
-        <SidePanel label="Notebooks">
-          <CoverNotebook title="title" />
+        <SidePanel label="Active Notebook Title">
+          <div className="relative h-60 w-full rounded-b-lg bg-purple-500 text-purple-50"></div>
           <BookShelf />
           <div className="mt-auto">
             <Account />

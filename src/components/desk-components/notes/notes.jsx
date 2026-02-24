@@ -1,4 +1,4 @@
-import { Clock3, NotepadText } from "lucide-react";
+import { Clock12, NotepadText } from "lucide-react";
 import Image from "next/image";
 
 const Note = () => {
@@ -26,12 +26,12 @@ const Pomodoro = ({ children }) => {
 
 const Session = ({ children }) => {
   return (
-    <div className="">
+    <>
       <h2 className="flex w-1/2 items-center justify-center gap-2 rounded-md bg-lime-500 px-2 py-1 text-lime-50">
-        <Clock3 size={18} /> Session
+        <Clock12 size={20} /> Session
       </h2>
       <div className="flex flex-col gap-2 px-4">{children}</div>
-    </div>
+    </>
   );
 };
 
