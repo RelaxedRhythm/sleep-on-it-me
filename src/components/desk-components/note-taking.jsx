@@ -4,24 +4,24 @@ import { NotepadTextDashed, Plus, Trash2 } from "lucide-react";
 
 const Note = ({ cue, definition, onDelete }) => {
   return (
-    <div className="group relative flex items-start gap-2 rounded-xl ring-red-400 hover:ring-2">
+    <div className="group relative flex items-start gap-2 rounded-xl group-hover:bg-amber-400">
+      <button
+        onClick={onDelete}
+        type="button"
+        className="peer absolute -left-6 hidden h-full w-8 items-center justify-center rounded-l-xl bg-red-400 text-red-50 group-hover:flex hover:cursor-pointer"
+      >
+        <Trash2 />
+      </button>
       <textarea
-        className="field-sizing-content w-1/3 rounded-xl bg-sky-100 p-5 outline-none focus:ring-2 focus:ring-sky-400"
+        className="field-sizing-content w-1/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-2 focus:ring-sky-400"
         type="text"
         placeholder={cue}
       />
       <textarea
-        className="field-sizing-content w-2/3 rounded-xl bg-sky-100 p-5 outline-none focus:ring-2 focus:ring-sky-400"
+        className="field-sizing-content w-2/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-2 focus:ring-sky-400"
         type="text"
         placeholder={definition}
       />
-      <button
-        onClick={onDelete}
-        type="button"
-        className="absolute -left-7 hidden h-full w-8 items-center justify-center rounded-l-xl bg-red-400 text-red-50 group-hover:flex hover:cursor-pointer"
-      >
-        <Trash2 />
-      </button>
     </div>
   );
 };
