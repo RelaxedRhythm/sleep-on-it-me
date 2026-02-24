@@ -21,7 +21,7 @@ export default function ToDo() {
     };
   useEffect(()=>{
     onload()
-  },[])
+  },[]);
 
   const addTask = () => {
     console.log(tasks);
@@ -58,7 +58,7 @@ export default function ToDo() {
         tasks.filter( task => task.id !== numericId)
       )
   }
-
+  // const items=fetchTodo
   return (
     <div>
       <ul>
@@ -93,12 +93,12 @@ export default function ToDo() {
         >
           SaveTask
         </button>
-        <button
+        {/* <button
           className="rounded-sm m-2 bg-blue-400 p-2 hover:cursor-pointer"
           onClick={onload}
         >
           showTask
-        </button>
+        </button> */}
        
       </div>
     </div>

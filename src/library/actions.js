@@ -47,9 +47,12 @@ async function writeBooks() {}
 async function writeTodo(tasks) {
   tasks.map(async (task)=>{
     const name=task.name;
+    const newTask=await client.query("SELECT * FROM to_do WHERE task = $1;",[name]);
+    if(newTask.rowCount!=0){
+      console.log("already present in db")
+      return;
+    }
     const status=task.status;
-
-    // if()
 
     await client.query("INSERT INTO to_do (task,status) values($1,$2);",[name,status]);
   })
