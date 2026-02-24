@@ -71,12 +71,12 @@ function TimerDisplay({
         Mode: {mode}
       </p>
       <div className="flex items-center justify-between font-medium">
-        <p className="text-m absolute bottom-0 left-0 bg-orange-400 px-4 py-1 text-orange-50">
+        <p className="absolute bottom-0 left-0 bg-orange-400 px-4 py-1 text-orange-50">
           {" "}
           Pomodori: {pomodoro}{" "}
         </p>
 
-        <p className="text-m absolute right-0 bottom-0 bg-orange-400 px-4 py-1 text-orange-50">
+        <p className="absolute right-0 bottom-0 bg-orange-400 px-4 py-1 text-orange-50">
           {" "}
           Sessions: {session}{" "}
         </p>
@@ -169,7 +169,7 @@ export default function Pomodoro() {
   };
 
   return (
-    <div className="min-w-80 rounded-xl bg-stone-200 p-4">
+    <div className="min-w-80 rounded-xl bg-lime-100 p-4">
       <TimerDisplay
         timeLeft={timeLeft}
         mode={mode}

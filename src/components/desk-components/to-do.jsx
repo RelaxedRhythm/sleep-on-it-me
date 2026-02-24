@@ -34,7 +34,7 @@ export default function ToDo() {
 
   return (
     <div className="mt-4 h-95">
-      <ul className="h-11/13 overflow-y-scroll rounded-xl bg-stone-50 py-4">
+      <ul className="h-11/13 overflow-y-scroll rounded-xl bg-lime-50 py-4">
         {tasks.map((task) => (
           <li
             key={task.id}

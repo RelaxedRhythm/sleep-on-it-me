@@ -13,12 +13,12 @@ const Note = ({ cue, definition, onDelete }) => {
         <Trash2 />
       </button>
       <textarea
-        className="field-sizing-content w-1/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-2 focus:ring-sky-400"
+        className="field-sizing-content w-1/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-1 focus:ring-sky-300 focus:ring-offset-2"
         type="text"
         placeholder={cue}
       />
       <textarea
-        className="field-sizing-content w-2/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-2 focus:ring-sky-400"
+        className="field-sizing-content w-2/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-1 focus:ring-sky-300 focus:ring-offset-2"
         type="text"
         placeholder={definition}
       />
@@ -76,7 +76,7 @@ const CornellNoteTaking = () => {
       <div className="flex justify-between rounded-xl bg-sky-200 p-5">
         <div className="w-1/3">{today}</div>
         <input
-          className="w-2/3 font-semibold tracking-wide outline-none"
+          className="w-2/3 font-semibold tracking-wide outline-none focus:ring-1 focus:ring-sky-300"
           placeholder="Title"
           type="text"
         />
@@ -104,7 +104,7 @@ const CornellNoteTaking = () => {
       {/* Summary */}
       <textarea
         required
-        className="field-sizing-content w-full rounded-xl bg-sky-100 p-5 outline-none focus:ring-2 focus:ring-sky-400"
+        className="field-sizing-content w-full rounded-xl bg-sky-100 p-5 outline-none focus:ring-1 focus:ring-sky-300 focus:ring-offset-2"
         placeholder="Summarize here..."
         type="text"
       />
