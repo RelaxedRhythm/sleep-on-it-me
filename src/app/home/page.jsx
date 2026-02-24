@@ -7,7 +7,7 @@ export const metadata = {
 
 function Welcome() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="relative grid w-full max-w-5xl grid-rows-[auto_auto_1fr_auto] gap-4 border p-4">
         {/* Header */}
         <div className="text-center text-lg font-semibold text-white">

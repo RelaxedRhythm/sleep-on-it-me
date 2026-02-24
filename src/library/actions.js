@@ -1,4 +1,3 @@
-"use server";
 import { client } from "./db";
 
 // user sign up
@@ -38,8 +37,12 @@ async function fetchUser(fd) {
 async function fetchTodo() {
   console.log("hello");
 }
-fetchTodo();
-async function fetchBooks() {}
+
+async function fetchBooks() {
+  const books = await client.query("select * from books;");
+
+  return books.rows;
+}
 async function fetchNotes() {}
 
 // write to db
