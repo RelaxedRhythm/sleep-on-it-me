@@ -34,7 +34,7 @@ export default function ToDo() {
 
   return (
     <div className="mt-4 h-95">
-      <ul className="h-11/13 overflow-y-scroll border-t-2 border-b-2 border-stone-300 bg-white py-4">
+      <ul className="h-11/13 overflow-y-scroll rounded-xl bg-stone-50 py-4">
         {tasks.map((task) => (
           <li
             key={task.id}
@@ -66,7 +66,7 @@ export default function ToDo() {
       </ul>
       <div className="py-4">
         <button
-          className="w-full rounded-sm bg-blue-400 p-2 text-blue-50 hover:cursor-pointer"
+          className="w-full rounded-xl bg-sky-500 p-2 text-sky-50 hover:cursor-pointer"
           onClick={handleTaskAdd}
         >
           Add Task

@@ -112,7 +112,7 @@ const CornellNoteTaking = () => {
       {/* cornell note actions */}
       <div className="flex gap-2">
         <button
-          className="w-1/2 rounded-xl bg-orange-500 p-5 font-semibold tracking-wide text-green-50 hover:cursor-pointer"
+          className="w-1/2 rounded-xl bg-orange-400 p-5 font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
           onClick={() => alert("Please save first!")}
         >
           New Cornell Note
