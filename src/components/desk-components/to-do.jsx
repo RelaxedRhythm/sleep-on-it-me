@@ -25,7 +25,7 @@ export default function ToDo() {
     onload()
   },[]);
 
-  const addTask =async () => {
+  const handleAddTask =async () => {
     const newTask={
       name:'',
       status:false,
@@ -89,7 +89,7 @@ export default function ToDo() {
       <div className="py-4">
         <button
           className="w-full rounded-xl m-2 bg-lime-500 p-2 font-semibold tracking-wide text-lime-50 hover:cursor-pointer"
-          onClick={addTaskAdd}
+          onClick={handleAddTask}
         >
           Add Task
         </button>

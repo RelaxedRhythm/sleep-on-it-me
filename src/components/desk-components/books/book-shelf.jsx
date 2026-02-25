@@ -1,9 +1,10 @@
 import { fetchBooks } from "@/library/actions";
 import { BookPlus, Library, NotebookText } from "lucide-react";
 
-async function BookShelf() {
+async function BookShelf({fetchUser}) {
   "use client";
-  const books = await fetchBooks();
+  const userId=fetchUser[0].id;
+  const books = await fetchBooks(userId);
 
   return (
     <div className="flex h-full flex-col text-lg">

@@ -23,16 +23,22 @@ async function makeUser(fd) {
 }
 
 // User Log in
-async function fetchUser(fd) {
+async function checkUser(fd) {
   const username = fd.get("username");
   const password = fd.get("password");
   const user = await client.query(
-    "SELECT username FROM users WHERE username = $1",
+    "SELECT * FROM users WHERE username = $1",
     [username],
   );
   if (user) {
     console.log("userfound");
   } else console.log("Please Sign Up");
+  return user.rows;
+}
+
+async function fetchUser(){
+    const user= await client.query("SELECT * FROM users where username='Rhythm'");
+    return user.rows;
 }
 
 // reading from db
@@ -45,8 +51,8 @@ async function fetchTodo() {
   // return tasks.rows;
 }
 
-async function fetchBooks() {
-  const books = await client.query("select * from books;");
+async function fetchBooks(userId) {
+  const books = await client.query("select * from books where user_id=$1;",[userId]);
   return books.rows;
 }
 async function fetchNotes() {}
@@ -86,7 +92,9 @@ async function deleteTodos(id){
 }
 
 export {
+
   makeUser,
+  checkUser,
   fetchUser,
   fetchTodo,
   fetchBooks,
