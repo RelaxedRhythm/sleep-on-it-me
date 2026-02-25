@@ -4,14 +4,11 @@ import { Trash2 } from "lucide-react";
 import { refresh } from "next/cache";
 import { useEffect, useState } from "react";
 export default function ToDo() {
-  const [tasks, addTask] = useState([
+  const [tasks, setTask] = useState([
     {
       id: 1,
-      name: "Task 1",
-    },
-    {
-      id: 2,
-      name: "Task 2",
+      name: "",
+      status: false,
     },
   ]);
 

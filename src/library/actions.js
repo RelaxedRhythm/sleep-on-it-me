@@ -41,8 +41,8 @@ async function fetchTodo() {
     const tasks= await client.query("SELECT id, task,status FROM to_do;");
     return tasks.rows;
 
-  const tasks = await client.query("SELECT id, task,status FROM to_do;");
-  return tasks.rows;
+  // const tasks = await client.query("SELECT id, task,status FROM to_do;");
+  // return tasks.rows;
 }
 
 async function fetchBooks() {
