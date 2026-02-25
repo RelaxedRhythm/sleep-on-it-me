@@ -6,7 +6,7 @@ export default function ToDo() {
   const [tasks, setTask] = useState([
     {
       id: 1,
-      name: "task 1",
+      name: "",
       status: false,
     },
   ]);
@@ -23,16 +23,18 @@ export default function ToDo() {
     onload()
   },[]);
 
-  const addTask = () => {
-    console.log(tasks);
-    setTask([
-      ...tasks,
-      {
-        id: tasks.length + 1,
-        name: `Task ${tasks.length + 1}`,
-        status: false,
-      },
-    ]);
+  const addTask =async () => {
+    
+
+    // console.log(tasks);
+    // setTask([
+    //   ...tasks,
+    //   {
+    //     id: tasks.length + 1,
+    //     name: `Task ${tasks.length + 1}`,
+    //     status: false,
+    //   },
+    // ]);
   };
 
   const handleCheck = (e, id) => {
@@ -60,7 +62,7 @@ export default function ToDo() {
   }
   // const items=fetchTodo
   return (
-    <div>
+    <div className="mt-4 h-95">
       <ul className="h-11/13 overflow-y-scroll border-t-2 border-b-2 border-stone-300 bg-white py-4">
         {tasks.map((task) => (
           <li
@@ -93,12 +95,6 @@ export default function ToDo() {
         >
           SaveTask
         </button>
-        {/* <button
-          className="rounded-sm m-2 bg-blue-400 p-2 hover:cursor-pointer"
-          onClick={onload}
-        >
-          showTask
-        </button> */}
        
       </div>
     </div>
