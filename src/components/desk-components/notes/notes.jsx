@@ -12,7 +12,7 @@ const Note = () => {
 
 const Pomodoro = ({ children }) => {
   return (
-    <div className="space-y-4 rounded-md border-2 border-orange-400 bg-orange-200 pb-4 text-orange-50">
+    <div className="space-y-4 rounded-md border-2 border-orange-400 bg-orange-100 pb-4 text-orange-50">
       <div className="flex items-center justify-center gap-2 bg-orange-400 p-2">
         <div className="relative size-6 object-fill">
           <Image src="/tomato.png" fill alt="tomato" sizes="24px" />
@@ -27,7 +27,7 @@ const Pomodoro = ({ children }) => {
 const Session = ({ children }) => {
   return (
     <>
-      <h2 className="flex w-1/2 items-center justify-center gap-2 rounded-md bg-lime-500 px-2 py-1 text-lime-50">
+      <h2 className="mt-4 flex w-1/2 items-center justify-center gap-2 rounded-md bg-lime-500 px-2 py-1 text-lime-50">
         <Clock12 size={20} /> Session
       </h2>
       <div className="flex flex-col gap-2 px-4">{children}</div>
@@ -38,11 +38,31 @@ const Session = ({ children }) => {
 const Notes = () => {
   return (
     <>
-      <div className="mb-4 h-10 rounded-b-lg bg-sky-500"></div>
-      <div className="font-semibold">
+      <div className="h-10 rounded-b-lg bg-sky-500"></div>
+      <div className="overflow-y-scroll pb-4 font-semibold">
         <Session>
           <Pomodoro>
             <Note />
+            <Note />
+            <Note />
+          </Pomodoro>
+          <Pomodoro>
+            <Note />
+            <Note />
+          </Pomodoro>
+          <Pomodoro>
+            <Note />
+            <Note />
+            <Note />
+            <Note />
+          </Pomodoro>
+          <Pomodoro>
+            <Note />
+            <Note />
+          </Pomodoro>
+        </Session>
+        <Session>
+          <Pomodoro>
             <Note />
             <Note />
           </Pomodoro>

@@ -14,7 +14,7 @@ async function BookShelf() {
         {books.map((book) => (
           <div
             key={book.id}
-            className="flex w-full items-center gap-2 rounded-lg px-4 py-2 font-semibold text-stone-700 hover:cursor-pointer hover:bg-sky-500 hover:text-sky-50 hover:shadow"
+            className="flex w-full items-center gap-2 rounded-lg px-4 py-2 font-medium text-stone-700 hover:cursor-pointer hover:bg-sky-500 hover:text-sky-50 hover:shadow"
           >
             <NotebookText /> {book.title}
           </div>
