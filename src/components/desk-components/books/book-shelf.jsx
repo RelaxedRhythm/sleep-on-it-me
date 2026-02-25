@@ -2,7 +2,6 @@ import { fetchBooks } from "@/library/actions";
 import { BookPlus, Library, NotebookText } from "lucide-react";
 
 async function BookShelf() {
-  "use client";
   const books = await fetchBooks();
 
   return (
