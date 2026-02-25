@@ -1,31 +1,16 @@
-"use client";
 import SidePanel from "@/components/desk-components/side-navigation-panels";
-import CoverNotebook from "@/components/desk-components/books/notebook-cover";
 import BookShelf from "@/components/desk-components/books/book-shelf";
 import Account from "@/components/desk-components/account";
-import { notebooks } from "@/library/notebooks";
-import { useState } from "react";
 import Notes from "@/components/desk-components/notes/notes";
 
 const DeskLayout = ({ children }) => {
-  const [active, setActive] = useState([
-    notebooks[0].title,
-    notebooks[0].notes,
-  ]);
-
-  const selectBook = ({ title, notes }) => {
-    setActive([title, notes]);
-  };
-  const selectNote = (title) => {
-    console.log(title);
-  };
-
+  "use client";
   return (
-    <div className="flex h-screen">
-      <div className="w-1/5">
-        <SidePanel label="Notebooks">
-          <CoverNotebook title={active[0]} />
-          <BookShelf data={active} onSelect={selectBook} />
+    <div className="flex h-screen w-full">
+      <div className="w-2/10">
+        <SidePanel label="Active Notebook Title">
+          <div className="relative h-60 w-full rounded-b-lg bg-purple-500 text-purple-50"></div>
+          <BookShelf />
           <div className="mt-auto">
             <Account />
           </div>
@@ -33,10 +18,9 @@ const DeskLayout = ({ children }) => {
       </div>
 
       <main className="w-3/5">{children}</main>
-
-      <div className="w-1/5">
+      <div className="ml-auto w-1/5">
         <SidePanel label="Notes">
-          <Notes data={active[1]} onSelect={selectNote} />
+          <Notes />
         </SidePanel>
       </div>
     </div>

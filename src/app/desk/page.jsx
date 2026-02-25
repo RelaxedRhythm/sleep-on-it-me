@@ -1,6 +1,8 @@
-import NoteTaking from "@/components/desk-components/note-taking";
+import CornellNoteTaking from "@/components/desk-components/note-taking";
 import NotebookSummary from "@/components/desk-components/summary";
 import Pomodoro from "@/components/desk-components/pomodoro";
+import SidePanel from "@/components/desk-components/side-navigation-panels";
+import Notes from "@/components/desk-components/notes/notes";
 
 export const metadata = {
   title: "Desk",
@@ -9,11 +11,13 @@ export const metadata = {
 
 const Desk = () => {
   return (
-    <div className="px-6">
-      <NotebookSummary />
-      <div className="flex justify-around">
-        <NoteTaking />
-        <Pomodoro />
+    <div className="flex">
+      <div className="space-y-4 px-6">
+        <NotebookSummary />
+        <div className="flex items-start justify-around">
+          <CornellNoteTaking />
+          <Pomodoro />
+        </div>
       </div>
     </div>
   );

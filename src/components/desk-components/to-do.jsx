@@ -4,11 +4,14 @@ import { Trash2 } from "lucide-react";
 import { refresh } from "next/cache";
 import { useEffect, useState } from "react";
 export default function ToDo() {
-  const [tasks, setTask] = useState([
+  const [tasks, addTask] = useState([
     {
       id: 1,
-      name: "",
-      status: false,
+      name: "Task 1",
+    },
+    {
+      id: 2,
+      name: "Task 2",
     },
   ]);
 
@@ -67,11 +70,11 @@ export default function ToDo() {
   // const items=fetchTodo
   return (
     <div className="mt-4 h-95">
-      <ul className="h-11/13 overflow-y-scroll border-t-2 border-b-2 border-stone-300 bg-white py-4">
+      <ul className="h-11/13 overflow-y-scroll rounded-xl bg-lime-50 py-4">
         {tasks.map((task) => (
           <li
             key={task.id}
-            className="group flex items-center gap-2 rounded-sm px-2 py-1 font-semibold text-stone-700 hover:bg-amber-200"
+            className="group flex max-w-72 items-center rounded-sm px-2 py-1 text-stone-700 hover:bg-amber-200"
           >
             <input
               type="checkbox"
@@ -86,12 +89,12 @@ export default function ToDo() {
           </li>
         ))}
       </ul>
-      <div>
+      <div className="py-4">
         <button
-          className="rounded-sm m-2 bg-blue-400 p-2 hover:cursor-pointer"
-          onClick={addTask}
+          className="w-full rounded-xl m-2 bg-lime-500 p-2 font-semibold tracking-wide text-lime-50 hover:cursor-pointer"
+          onClick={addTaskAdd}
         >
-          AddTask
+          Add Task
         </button>
         
        

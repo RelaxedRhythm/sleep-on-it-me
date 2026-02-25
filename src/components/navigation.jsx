@@ -3,10 +3,12 @@ import { navigationLinks } from "@/library/navigation-links";
 
 const Routes = () => {
   return (
-    <ul className="flex justify-center gap-4">
+    <ul className="flex h-10 items-center justify-center gap-4 text-lg font-semibold text-sky-600">
       {navigationLinks.map((link) => (
         <li key={link.id}>
-          <Link href={link.url}>{link.name}</Link>
+          <Link href={link.url} className="hover:text-sky-400">
+            {link.name}
+          </Link>
         </li>
       ))}
     </ul>
