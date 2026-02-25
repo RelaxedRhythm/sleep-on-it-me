@@ -1,6 +1,7 @@
 "use client";
 import { deleteTodos, fetchTodo, writeTodo } from "@/library/actions";
 import { Trash2 } from "lucide-react";
+import { refresh } from "next/cache";
 import { useEffect, useState } from "react";
 export default function ToDo() {
   const [tasks, setTask] = useState([
@@ -18,32 +19,35 @@ export default function ToDo() {
         name:item.task,
         status:item.status
       })))
+      
     };
   useEffect(()=>{
     onload()
   },[]);
 
   const addTask =async () => {
-    
+    const newTask={
+      name:'',
+      status:false,
+    }
 
-    // console.log(tasks);
-    // setTask([
-    //   ...tasks,
-    //   {
-    //     id: tasks.length + 1,
-    //     name: `Task ${tasks.length + 1}`,
-    //     status: false,
-    //   },
-    // ]);
+    console.log(tasks);
+    setTask((prevTasks)=>[
+      ...prevTasks,
+      newTask
+    ]);
+
+    await writeTodo[newTask]
   };
 
-  const handleCheck = (e, id) => {
+  const handleCheck = async(e, id) => {
     
-    setTask((items) =>
-      items.map((task) => 
+    setTask((tasks) =>
+      tasks.map((task) => 
         task.id === id ? { ...task, status: e.target.checked} : task
       ),
     );
+    await writeTodo([{id,status:true}]);
   };
 
   const handleInput=(e,id)=>{
@@ -89,12 +93,7 @@ export default function ToDo() {
         >
           AddTask
         </button>
-        <button
-          className="rounded-sm m-2 bg-blue-400 p-2 hover:cursor-pointer"
-          onClick={()=>writeTodo(tasks)}
-        >
-          SaveTask
-        </button>
+        
        
       </div>
     </div>

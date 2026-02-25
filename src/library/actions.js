@@ -1,4 +1,5 @@
 "use server";
+import { refresh } from "next/cache";
 import { client } from "./db";
 
 // user sign up
@@ -55,6 +56,8 @@ async function writeTodo(tasks) {
     const status=task.status;
 
     await client.query("INSERT INTO to_do (task,status) values($1,$2);",[name,status]);
+
+    refresh();
   })
   
 }
