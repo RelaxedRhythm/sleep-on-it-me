@@ -97,8 +97,8 @@ export default function Pomodoro() {
   const [mode, setMode] = useState("study"); // shortbreak || longbreak
   const [timeLeft, setTimeLeft] = useState(timers.study); //to update timer
   const [isPaused, setIsPaused] = useState(false); // see if timer paused
-  const [pomodoro, setPomodoros] = useState(0); //count number of pomodoro
-  const [session, setSessions] = useState(0); // count number of sessions
+  const [pomodoro, setPomodoros] = useState(1); //count number of pomodoro
+  const [session, setSessions] = useState(1); // count number of sessions
   const [isStarted, setIsStarted] = useState(false);
   const [sound, setSound] = useState(true);
 
@@ -125,7 +125,7 @@ export default function Pomodoro() {
   const handleSessionComplete = () => {
     if (mode === "study") {
       const next = pomodoro + 1;
-      if (next === 4) {
+      if (next === 5) {
         setPomodoros(0);
         setSessions(session + 1);
         setMode("longBreak");
