@@ -12,13 +12,13 @@ function Controls({ onReset, onStart, isStarted, isPaused }) {
           {" "}
           <button
             onClick={onReset}
-            className="mt-3 w-full rounded-xl bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
+            className="mt-3 w-full rounded-xl bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer hover:bg-orange-50 hover:text-orange-500 hover:shadow"
           >
             Reset
           </button>
           <button
             onClick={onStart}
-            className="mt-3 w-full rounded-xl bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
+            className="mt-3 w-full rounded-xl bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer hover:bg-orange-50 hover:text-orange-500 hover:shadow"
           >
             {!isPaused ? "Pause" : "Resume"}
           </button>
@@ -27,7 +27,7 @@ function Controls({ onReset, onStart, isStarted, isPaused }) {
         <div className="flex justify-center">
           <button
             onClick={onStart}
-            className="mt-3 w-full rounded-lg bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
+            className="mt-3 w-full rounded-lg bg-orange-400 p-2 font-semibold tracking-wide text-orange-50 hover:cursor-pointer hover:bg-orange-50 hover:text-orange-500 hover:shadow"
           >
             Start
           </button>
@@ -72,13 +72,11 @@ function TimerDisplay({
       </p>
       <div className="flex items-center justify-between font-medium">
         <p className="absolute bottom-0 left-0 bg-orange-400 px-4 py-1 text-orange-50">
-          {" "}
-          Pomodori: {pomodoro}{" "}
+          Pomodori: {pomodoro}
         </p>
 
         <p className="absolute right-0 bottom-0 bg-orange-400 px-4 py-1 text-orange-50">
-          {" "}
-          Sessions: {session}{" "}
+          Sessions: {session}
         </p>
       </div>
 

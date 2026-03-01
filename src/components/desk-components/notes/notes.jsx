@@ -3,7 +3,7 @@ import Image from "next/image";
 
 const Note = () => {
   return (
-    <div className="flex items-center gap-2 rounded-sm bg-orange-400 px-4 py-1 hover:cursor-pointer hover:bg-orange-300 hover:shadow">
+    <div className="flex items-center gap-2 rounded-sm bg-orange-400 px-4 py-1 hover:cursor-pointer hover:bg-orange-50 hover:text-orange-400 hover:shadow">
       <NotepadText />
       Note
     </div>

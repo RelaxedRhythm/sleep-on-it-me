@@ -68,7 +68,7 @@ const CornellNoteTaking = () => {
   };
 
   return (
-    <main className="max-w-1/2 min-w-1/2 space-y-2 text-stone-700">
+    <main className="max-h-175 max-w-1/2 min-w-1/2 space-y-2 text-stone-700">
       <h2 className="flex items-center gap-2 font-semibold tracking-wide text-stone-400">
         <NotepadTextDashed /> Make your Cornell note here.
       </h2>
@@ -95,7 +95,7 @@ const CornellNoteTaking = () => {
       {/* add KVP */}
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-500 p-4 font-semibold tracking-wide text-lime-50 hover:cursor-pointer"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-500 p-4 font-semibold tracking-wide text-lime-50 hover:cursor-pointer hover:bg-lime-50 hover:text-lime-500 hover:shadow"
         onClick={handleKVPAdd}
       >
         <Plus />
@@ -112,13 +112,13 @@ const CornellNoteTaking = () => {
       {/* cornell note actions */}
       <div className="flex gap-2">
         <button
-          className="w-1/2 rounded-xl bg-orange-400 p-5 font-semibold tracking-wide text-orange-50 hover:cursor-pointer"
+          className="w-1/2 rounded-xl bg-orange-400 p-5 font-semibold tracking-wide text-orange-50 hover:cursor-pointer hover:bg-orange-50 hover:text-orange-400 hover:shadow"
           onClick={() => alert("Please save first!")}
         >
           New Cornell Note
         </button>
         <button
-          className="w-1/2 rounded-xl bg-sky-500 p-5 text-lg font-semibold tracking-wide text-sky-50 hover:cursor-pointer"
+          className="w-1/2 rounded-xl bg-sky-500 p-5 text-lg font-semibold tracking-wide text-sky-50 hover:cursor-pointer hover:bg-sky-50 hover:text-sky-500 hover:shadow"
           onClick={handleCornellNoteSave}
         >
           Save

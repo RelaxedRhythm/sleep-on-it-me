@@ -22,7 +22,7 @@ async function makeUser(fd) {
 }
 
 // User Log in
-async function fetchUser(fd) {
+async function checkUser(fd) {
   const username = fd.get("username");
   const password = fd.get("password");
   const user = await client.query(
@@ -33,6 +33,10 @@ async function fetchUser(fd) {
     console.log("userfound");
   } else console.log("Please Sign Up");
 }
+const fetchUser = async (id) => {
+  const user = await client.query("Select * FROM users WHERE id = $1", [id]);
+  return user.rows[0];
+};
 
 // reading from db
 
@@ -41,11 +45,18 @@ async function fetchTodo() {
   return tasks.rows;
 }
 
-async function fetchBooks() {
-  const books = await client.query("select * from books;");
+async function fetchBooks(userId) {
+  const books = await client.query("SELECT * FROM books WHERE user_id = $1", [
+    userId,
+  ]);
   return books.rows;
 }
-async function fetchNotes() {}
+async function fetchNotes(bookId) {
+  const notes = await client.query("SELECT * FROM notes WHERE book_id = $1", [
+    bookId,
+  ]);
+  return notes.rows;
+}
 
 // write to db
 async function writeBooks() {}

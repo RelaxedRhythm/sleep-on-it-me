@@ -66,7 +66,7 @@ export default function ToDo() {
       </ul>
       <div className="py-4">
         <button
-          className="w-full rounded-xl bg-lime-500 p-2 font-semibold tracking-wide text-lime-50 hover:cursor-pointer"
+          className="w-full rounded-xl bg-lime-500 p-2 font-semibold tracking-wide text-lime-50 hover:cursor-pointer hover:bg-lime-50 hover:text-lime-500 hover:shadow"
           onClick={handleTaskAdd}
         >
           Add Task
