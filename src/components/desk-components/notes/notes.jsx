@@ -1,11 +1,11 @@
 import { Clock12, NotepadText } from "lucide-react";
 import Image from "next/image";
 
-const Note = () => {
+const Note = ({ title }) => {
   return (
     <div className="flex items-center gap-2 rounded-sm bg-orange-400 px-4 py-1 hover:cursor-pointer hover:bg-orange-50 hover:text-orange-400 hover:shadow">
       <NotepadText />
-      Note
+      {title}
     </div>
   );
 };
@@ -73,3 +73,4 @@ const Notes = () => {
 };
 
 export default Notes;
+export { Note };

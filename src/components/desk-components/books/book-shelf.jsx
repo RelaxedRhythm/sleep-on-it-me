@@ -1,6 +1,3 @@
-"use server";
-
-import { fetchBooks } from "@/library/actions";
 import { BookPlus, Library, NotebookText } from "lucide-react";
 import AddBook from "./addbook";
 import Book from "./book";
