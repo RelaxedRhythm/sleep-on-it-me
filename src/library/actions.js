@@ -59,24 +59,22 @@ async function fetchNotes() {}
 
 // write to db
 async function writeBooks() {}
-async function writeTodo(tasks) {
+async function writeTodo(task) {
   client.query();
-
-  tasks.map(async (task)=>{
-    const name=task.name;
-    const newTask=await client.query("SELECT * FROM to_do WHERE task = $1;",[name]);
-    if(newTask.rowCount!=0){
-      console.log("already present in db")
-      return;
-    }
+  const name=task.name;
     const status=task.status;
-
-    await client.query("INSERT INTO to_do (task,status) values($1,$2);",[name,status]);
-
-    refresh();
-  })
+  try{
+    const result=await client.query("INSERT INTO to_do (task,status) values($1,$2) returning*;",[name,status]);
+    
+      return result.rows[0];
+    }
+    catch(err){
+      console.log(err.message);
+      return null;
+    }
+  }
   
-}
+
 async function writeNotes() {}
 
 async function deleteTodos(id){
@@ -89,6 +87,19 @@ async function deleteTodos(id){
       
     await client.query("DELETE FROM to_do where id=$1",[id]);
     console.log("deletion success");
+}
+async function updateTodo(id, task, status) {
+  try {
+    const result = await client.query(
+      "UPDATE to_do SET task = $1, status = $2 WHERE id = $3 RETURNING *;",
+      [task, status, id]
+    );
+
+    return result.rows[0];
+  } catch (err) {
+    console.error(err.message);
+    return null;
+  }
 }
 
 export {
@@ -103,4 +114,5 @@ export {
   writeNotes,
   writeTodo,
   deleteTodos,
+  updateTodo,
 };

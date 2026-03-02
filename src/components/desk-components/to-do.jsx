@@ -1,5 +1,5 @@
 "use client";
-import { deleteTodos, fetchTodo, writeTodo } from "@/library/actions";
+import { deleteTodos, fetchTodo, writeTodo,updateTodo } from "@/library/actions";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 export default function ToDo() {
@@ -14,8 +14,8 @@ export default function ToDo() {
   async function onload(){
       const task=await fetchTodo();
       setTask(task.map(item=>({
-        id:Number(item.id),
-        name:item.task,
+        id:item.id,
+        name:item.task?? "",
         status:item.status
       })))
       
@@ -29,31 +29,44 @@ export default function ToDo() {
       name:'',
       status:false,
     }
-
+     const createdTask=await writeTodo([newTask])
     console.log(tasks);
     setTask((prevTasks)=>[
       ...prevTasks,
-      newTask
+      {
+      id: Number(createdTask.id),
+      name: createdTask.task,
+      status: createdTask.status,
+    },
     ]);
 
-    await writeTodo[newTask]
+   
   };
 
   const handleCheck = async(e, id) => {
-    
+    const updatedStatus= e.target.checked;
     setTask((tasks) =>
       tasks.map((task) => 
-        task.id === id ? { ...task, status: e.target.checked} : task
+        task.id === id ? { ...task, status:updatedStatus} : task
       ),
     );
-    await writeTodo([{id,status:true}]);
+    // Find current task name (we must send both fields)
+  const currentTask = tasks.find((t) => t.id === id);
+
+  await updateTodo(id, currentTask.name, updatedStatus);
+   
   };
 
   const handleInput=(e,id)=>{
     setTask((items)=>items.map(item=>
       item.id===id ? {...item,name:e.target.value}: item
     ))
-  }
+  };
+  const handleSave = async (e, id) => {
+  const updatedTask = tasks.find((t) => t.id === id);
+
+  await updateTodo(id, updatedTask.name, updatedTask.status);
+};
 
   const handleDelete=async (id)=>{
     console.log("clicked");
@@ -78,7 +91,7 @@ export default function ToDo() {
               checked={task.status}
               onChange={(e) => handleCheck(e, task.id)}
             />
-            <input type="text" value={task.name} onChange={(e)=>handleInput(e,task.id)} />
+            <input type="text" value={task.name} onChange={(e)=>handleInput(e,task.id)}  onBlur={(e) => handleSave(e, task.id)} />
             <div className="ml-auto flex gap-2 ">
               <Trash2 size={20} className="text-red-400  hover:cursor-pointer relative z-50" onClick={()=>handleDelete(task.id)} />
             </div>
