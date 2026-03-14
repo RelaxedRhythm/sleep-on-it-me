@@ -1,4 +1,5 @@
 "use server";
+import { refresh } from "next/cache";
 import { client } from "./db";
 
 // user sign up
@@ -22,13 +23,13 @@ async function makeUser(fd) {
 }
 
 // User Log in
+// async function checkUser(fd)
 async function checkUser(fd) {
   const username = fd.get("username");
   const password = fd.get("password");
-  const user = await client.query(
-    "SELECT username FROM users WHERE username = $1",
-    [username],
-  );
+  const user = await client.query("SELECT * FROM users WHERE username = $1", [
+    username,
+  ]);
   if (user) {
     console.log("userfound");
   } else console.log("Please Sign Up");
@@ -43,6 +44,9 @@ const fetchUser = async (id) => {
 async function fetchTodo() {
   const tasks = await client.query("SELECT id, task,status FROM to_do;");
   return tasks.rows;
+
+  // const tasks = await client.query("SELECT id, task,status FROM to_do;");
+  // return tasks.rows;
 }
 
 async function fetchBooks(userId) {
@@ -60,13 +64,55 @@ async function fetchNotes(bookId) {
 
 // write to db
 async function writeBooks() {}
-async function writeTodo() {
+async function writeTodo(task) {
   client.query();
+  const name = task.name;
+  const status = task.status;
+  try {
+    const result = await client.query(
+      "INSERT INTO to_do (task,status) values($1,$2) returning*;",
+      [name, status],
+    );
+
+    return result.rows[0];
+  } catch (err) {
+    console.log(err.message);
+    return null;
+  }
 }
+
 async function writeNotes() {}
+
+async function deleteTodos(id) {
+  const deletedTask = await client.query("SELECT * FROM to_do WHERE id = $1;", [
+    id,
+  ]);
+
+  if (deletedTask.rowCount === 0) {
+    console.log("error: cant delete ....");
+    return;
+  }
+
+  await client.query("DELETE FROM to_do where id=$1", [id]);
+  console.log("deletion success");
+}
+async function updateTodo(id, task, status) {
+  try {
+    const result = await client.query(
+      "UPDATE to_do SET task = $1, status = $2 WHERE id = $3 RETURNING *;",
+      [task, status, id],
+    );
+
+    return result.rows[0];
+  } catch (err) {
+    console.error(err.message);
+    return null;
+  }
+}
 
 export {
   makeUser,
+  checkUser,
   fetchUser,
   fetchTodo,
   fetchBooks,
@@ -74,4 +120,6 @@ export {
   writeBooks,
   writeNotes,
   writeTodo,
+  deleteTodos,
+  updateTodo,
 };

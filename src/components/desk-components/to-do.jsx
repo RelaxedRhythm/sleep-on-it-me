@@ -1,64 +1,110 @@
 "use client";
+import {
+  deleteTodos,
+  fetchTodo,
+  writeTodo,
+  updateTodo,
+} from "@/library/actions";
 import { Trash2 } from "lucide-react";
-import { useState } from "react";
-import { writeTodo } from "@/library/actions";
-
+import { useEffect, useState } from "react";
 export default function ToDo() {
-  const [tasks, setTask] = useState([]);
+  const [tasks, setTask] = useState([
+    {
+      id: 1,
+      name: "",
+      status: false,
+    },
+  ]);
 
-  const handleTaskAdd = () => {
-    setTask([
-      ...tasks,
+  async function onload() {
+    const task = await fetchTodo();
+    setTask(
+      task.map((item) => ({
+        id: item.id,
+        name: item.task ?? "",
+        status: item.status,
+      })),
+    );
+  }
+  useEffect(() => {
+    onload();
+  }, []);
+
+  const handleAddTask = async () => {
+    const newTask = {
+      name: "",
+      status: false,
+    };
+    const createdTask = await writeTodo([newTask]);
+    console.log(tasks);
+    setTask((prevTasks) => [
+      ...prevTasks,
       {
-        id: tasks.length + 1,
-        name: `Task ${tasks.length + 1}`,
+        id: Number(createdTask.id),
+        name: createdTask.task,
+        status: createdTask.status,
       },
     ]);
   };
 
-  function handleTaskEdit(e, id) {
+  const handleCheck = async (e, id) => {
+    const updatedStatus = e.target.checked;
     setTask((tasks) =>
-      tasks.map((item) => {
-        if (item.id === id) {
-          return { ...item, name: e.target.value };
-        } else {
-          return item;
-        }
-      }),
+      tasks.map((task) =>
+        task.id === id ? { ...task, status: updatedStatus } : task,
+      ),
     );
-  }
+    // Find current task name (we must send both fields)
+    const currentTask = tasks.find((t) => t.id === id);
 
-  const handleTaskDelete = (id) => {
-    setTask((tasks) => tasks.filter((task) => task.id !== id));
+    await updateTodo(id, currentTask.name, updatedStatus);
   };
 
+  const handleInput = (e, id) => {
+    setTask((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, name: e.target.value } : item,
+      ),
+    );
+  };
+  const handleSave = async (e, id) => {
+    const updatedTask = tasks.find((t) => t.id === id);
+
+    await updateTodo(id, updatedTask.name, updatedTask.status);
+  };
+
+  const handleDelete = async (id) => {
+    console.log("clicked");
+    const numericId = Number(id);
+    await deleteTodos(numericId);
+    setTask((tasks) => tasks.filter((task) => task.id !== numericId));
+  };
+  // const items=fetchTodo
   return (
     <div className="mt-4 h-95">
       <ul className="h-11/13 overflow-y-scroll rounded-xl bg-lime-50 py-4">
         {tasks.map((task) => (
           <li
             key={task.id}
-            className="group flex max-w-72 items-center rounded-sm px-2 py-1 text-stone-700 hover:bg-amber-200"
+            className="group flex max-w-72 items-center gap-2 rounded-sm px-2 py-1 text-stone-700 hover:bg-amber-200"
           >
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                className="size-5"
-                // onChange={(e) => handleCheck(e, task.id)}
-              />
-              <input
-                type="text"
-                className="w-2/3"
-                defaultValue={task.name}
-                onChange={(e) => handleTaskEdit(e, task.id)}
-              />
-            </div>
-
-            <div className="ml-auto hidden gap-2 group-hover:flex">
+            <input
+              type="checkbox"
+              className="size-6"
+              checked={task.status}
+              onChange={(e) => handleCheck(e, task.id)}
+            />
+            <input
+              type="text"
+              defaultValue={"task 1"}
+              onChange={(e) => handleInput(e, task.id)}
+              onBlur={(e) => handleSave(e, task.id)}
+            />
+            <div className="ml-auto flex gap-2">
               <Trash2
                 size={20}
-                className="text-red-400 hover:cursor-pointer"
-                onClick={() => handleTaskDelete(task.id)}
+                className="relative z-50 text-red-400 hover:cursor-pointer"
+                onClick={() => handleDelete(task.id)}
               />
             </div>
           </li>
@@ -66,8 +112,8 @@ export default function ToDo() {
       </ul>
       <div className="py-4">
         <button
-          className="w-full rounded-xl bg-lime-500 p-2 font-semibold tracking-wide text-lime-50 hover:cursor-pointer hover:bg-lime-50 hover:text-lime-500 hover:shadow"
-          onClick={handleTaskAdd}
+          className="m-2 w-full rounded-xl bg-lime-500 p-2 font-semibold tracking-wide text-lime-50 hover:cursor-pointer"
+          onClick={handleAddTask}
         >
           Add Task
         </button>
