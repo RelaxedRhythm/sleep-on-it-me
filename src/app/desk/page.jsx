@@ -8,12 +8,7 @@ import { Note } from "@/components/desk-components/notes/notes";
 import Book from "@/components/desk-components/books/book";
 import BookShelf from "@/components/desk-components/books/book-shelf";
 import Account from "@/components/desk-components/account";
-import { fetchBooks, fetchNotes, fetchUser } from "@/library/actions";
-
-// export const metadata = {
-//   title: "Desk",
-//   description: "The best productive environment for you! Built with caution.",
-// };
+import { fetchBooks, fetchNotes } from "@/library/actions";
 
 const Desk = () => {
   const [shelf, setShelf] = useState();
