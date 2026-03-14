@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { NotepadTextDashed, Plus, Trash2 } from "lucide-react";
+import { writeNotes } from "@/library/actions";
 
-const Note = ({ cue, definition, onDelete }) => {
+const Note = ({ cue, definition, onDelete,name }) => {
   return (
     <div className="group relative flex items-start gap-2 rounded-xl group-hover:bg-amber-400">
       <button
@@ -12,15 +13,18 @@ const Note = ({ cue, definition, onDelete }) => {
       >
         <Trash2 />
       </button>
+      
       <textarea
         className="field-sizing-content w-1/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-1 focus:ring-sky-300 focus:ring-offset-2"
         type="text"
         placeholder={cue}
+        name="key"
       />
       <textarea
         className="field-sizing-content w-2/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-1 focus:ring-sky-300 focus:ring-offset-2"
         type="text"
         placeholder={definition}
+        name="defintion"
       />
     </div>
   );
@@ -68,7 +72,7 @@ const CornellNoteTaking = () => {
   };
 
   return (
-    <main className="max-h-175 max-w-1/2 min-w-1/2 space-y-2 text-stone-700">
+    <form className="max-h-175 max-w-1/2 min-w-1/2 space-y-2 text-stone-700" action={writeNotes}>
       <h2 className="flex items-center gap-2 font-semibold tracking-wide text-stone-400">
         <NotepadTextDashed /> Make your Cornell note here.
       </h2>
@@ -79,6 +83,7 @@ const CornellNoteTaking = () => {
           className="w-2/3 font-semibold tracking-wide outline-none focus:ring-1 focus:ring-sky-300"
           placeholder="Title"
           type="text"
+          name="title"
         />
       </div>
 
@@ -107,6 +112,7 @@ const CornellNoteTaking = () => {
         className="field-sizing-content w-full rounded-xl bg-sky-100 p-5 outline-none focus:ring-1 focus:ring-sky-300 focus:ring-offset-2"
         placeholder="Summarize here..."
         type="text"
+        name="summary"
       />
 
       {/* cornell note actions */}
@@ -119,12 +125,12 @@ const CornellNoteTaking = () => {
         </button>
         <button
           className="w-1/2 rounded-xl bg-sky-500 p-5 text-lg font-semibold tracking-wide text-sky-50 hover:cursor-pointer hover:bg-sky-50 hover:text-sky-500 hover:shadow"
-          onClick={handleCornellNoteSave}
+          
         >
           Save
         </button>
       </div>
-    </main>
+    </form>
   );
 };
 

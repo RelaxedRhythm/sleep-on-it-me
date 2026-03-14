@@ -81,7 +81,22 @@ async function writeTodo(task) {
   }
 }
 
-async function writeNotes() {}
+async function writeNotes(formData) {
+    const summary=formData.get("summary");
+    const title=formData.get("title");
+    // console.log(summary);
+    const notes=await client.query('INSERT INTO notes(session_id,pomodoro_id,title,summary) values($1,$2,$3,$4) returning id',[1,2,title,summary]);
+    const note_id=notes.rows[0].id;
+    const keys=formData.getAll('key');
+    const definitions=formData.getAll('defintion');
+    //to loop through both arrays together....
+    keys.forEach(async(cue,index) => {
+        const content=definitions[index];
+        await client.query("INSERT INTO note_details (cue,content,note_id) values($1,$2,$3);",
+      [cue, content,note_id],
+    );
+    });
+  }
 
 async function deleteTodos(id) {
   const deletedTask = await client.query("SELECT * FROM to_do WHERE id = $1;", [
