@@ -1,11 +1,19 @@
+"use client";
 import "../globals.css";
 
-export const metadata = {
-  title: "Sleep on it! | HOME",
-  description: "The best productive learning app on the market",
-};
+import {useSession} from "next-auth/react";
+// export const metadata = {
+//   title: "Sleep on it! | HOME",
+//   description: "The best productive learning app on the market",
+// };
 
 function Welcome() {
+
+  const { data: session, status } = useSession();
+
+  if (status === "loading") return <p>Loading...</p>;
+
+
   return (
     <div className="mr-auto ml-auto flex h-screen w-8/10 flex-col gap-4 p-4">
       {/* Header */}
@@ -17,10 +25,9 @@ function Welcome() {
       {/* Main content */}
       <div className="flex gap-4">
         {/* Welcome box */}
-        <div className="flex h-60 min-w-80 items-center justify-center rounded-lg bg-pink-300 text-center">
-          Welcome
-          <br />
-          (Name!)
+        <div className="flex h-60 min-w-80 items-center justify-center rounded-lg bg-pink-300 text-center flex-col gap-2">
+          <h1>Welcome</h1>
+          <p>{session?.user?.fname} {session?.user?.lname}</p>
         </div>
 
         {/* Learning streak box */}

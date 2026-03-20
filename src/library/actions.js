@@ -1,29 +1,68 @@
 "use server";
 import { refresh } from "next/cache";
 import { client } from "./db";
+import bcrypt from "bcryptjs";
+import { redirect } from "next/navigation";
+import { signUpFormSchema } from "./validation";
 
 // user sign up
-async function makeUser(fd) {
-  const first_name = fd.get("fname");
-  const last_name = fd.get("lname");
-  const username = fd.get("username");
-  const email = fd.get("mail");
-  const password = fd.get("password");
+async function signup(state, formData) {
+  const validatedFields = signUpFormSchema.safeParse({
+    fname: formData.get("fname"),
+    lname: formData.get("lname"),
+    username: formData.get("username"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
 
+  const { fname, lname, username, email, password } = validatedFields.data;
+  console.log(fname, lname, username, email, password );
   let user = await client.query(
     "SELECT first_name FROM users WHERE email = $1",
     [email],
   );
   if (!user.rowCount) {
+    const hashedPassword = await bcrypt.hash(password, 10);
     await client.query(
       "INSERT INTO users (first_name, last_name, username, email, password_hash) values ($1, $2, $3, $4, $5)",
-      [first_name, last_name, username, email, password],
+      [fname, lname, username, email, hashedPassword],
     );
-  } else console.log("Please log in!");
+  } else{
+    return {
+      errors: {email: ["Email already exists. Please log in!"],
+      },
+      
+    }
+  }
+
+  redirect("/login");
+
 }
+// async function makeUser(fd) {
+//   const first_name = fd.get("fname");
+//   const last_name = fd.get("lname");
+//   const username = fd.get("username");
+//   const email = fd.get("mail");
+//   const password = fd.get("password");
+
+//   let user = await client.query(
+//     "SELECT first_name FROM users WHERE email = $1",
+//     [email],
+//   );
+//   if (!user.rowCount) {
+//     await client.query(
+//       "INSERT INTO users (first_name, last_name, username, email, password_hash) values ($1, $2, $3, $4, $5)",
+//       [first_name, last_name, username, email, password],
+//     );
+//   } else console.log("Please log in!");
+// }
 
 // User Log in
-// async function checkUser(fd)
 async function checkUser(fd) {
   const username = fd.get("username");
   const password = fd.get("password");
@@ -126,7 +165,8 @@ async function updateTodo(id, task, status) {
 }
 
 export {
-  makeUser,
+  signup,
+  // makeUser,
   checkUser,
   fetchUser,
   fetchTodo,
