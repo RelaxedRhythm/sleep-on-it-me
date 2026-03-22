@@ -37,14 +37,14 @@ export default function Login() {
       onSubmit={handleSubmit}
       className="m-[20] flex w-100 flex-col justify-center gap-4 rounded-sm border border-gray-500 p-4"
     >
-      <p className="text-center text-3xl">Sign In</p>
+      <p className="text-center text-3xl">Login</p>
       <p className="text-center text-sm text-gray-500">
         Enter your credentials to continue
       </p>
       <input
         className="m-[8] rounded-sm border border-gray-500 p-2"
         name="username"
-        placeholder="username"
+        placeholder="username or email"
         type="text"
       />
       <input

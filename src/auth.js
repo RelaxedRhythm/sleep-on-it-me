@@ -22,7 +22,7 @@ export const {handlers,auth,signIn,signOut} = NextAuth({
            if (!identifier || !password) return null;
 
           const result = await client.query(
-            "SELECT * from users where username=$1 LIMIT 1 ; ",
+            "SELECT * from users where username=$1 or email=$1 LIMIT 1 ; ",
             [identifier],
           );
 
