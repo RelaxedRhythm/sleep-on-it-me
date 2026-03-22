@@ -21,7 +21,7 @@ async function signup(state, formData) {
   }
 
   const { fname, lname, username, email, password } = validatedFields.data;
-  console.log(fname, lname, username, email, password );
+  console.log(fname, lname, username, email, password);
   let user = await client.query(
     "SELECT first_name FROM users WHERE email = $1",
     [email],
@@ -32,16 +32,13 @@ async function signup(state, formData) {
       "INSERT INTO users (first_name, last_name, username, email, password_hash) values ($1, $2, $3, $4, $5)",
       [fname, lname, username, email, hashedPassword],
     );
-  } else{
+  } else {
     return {
-      errors: {email: ["Email already exists. Please log in!"],
-      },
-      
-    }
+      errors: { email: ["Email already exists. Please log in!"] },
+    };
   }
 
   redirect("/login");
-
 }
 // async function makeUser(fd) {
 //   const first_name = fd.get("fname");
@@ -121,21 +118,28 @@ async function writeTodo(task) {
 }
 
 async function writeNotes(formData) {
-    const summary=formData.get("summary");
-    const title=formData.get("title");
-    // console.log(summary);
-    const notes=await client.query('INSERT INTO notes(session_id,pomodoro_id,title,summary) values($1,$2,$3,$4) returning id',[1,2,title,summary]);
-    const note_id=notes.rows[0].id;
-    const keys=formData.getAll('key');
-    const definitions=formData.getAll('defintion');
-    //to loop through both arrays together....
-    keys.forEach(async(cue,index) => {
-        const content=definitions[index];
-        await client.query("INSERT INTO note_details (cue,content,note_id) values($1,$2,$3);",
-      [cue, content,note_id],
+  const summary = formData.get("summary");
+  const title = formData.get("title");
+  const book_id = formData.get("book_id");
+  // console.log(summary);
+  const notes = await client.query(
+    "INSERT INTO notes(session_id,pomodoro_id,title,summary,book_id) values($1,$2,$3,$4,$5) returning id",
+    [1, 2, title, summary, book_id],
+  );
+  const note_id = notes.rows[0].id;
+  const keys = formData.getAll("key");
+  const definitions = formData.getAll("definition");
+  //to loop through both arrays together....
+  for (let i = 0; i < keys.length; i++) {
+    const cue = keys[i];
+    const content = definitions[i];
+
+    await client.query(
+      "INSERT INTO note_details (cue,content,note_id) values($1,$2,$3);",
+      [cue, content, note_id],
     );
-    });
   }
+}
 
 async function deleteTodos(id) {
   const deletedTask = await client.query("SELECT * FROM to_do WHERE id = $1;", [

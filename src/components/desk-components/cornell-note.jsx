@@ -3,7 +3,8 @@ import { useState } from "react";
 import { NotepadTextDashed, Plus, Trash2 } from "lucide-react";
 import { writeNotes } from "@/library/actions";
 
-const Note = ({ cue, definition, onDelete,name }) => {
+const Note = ({ cue, definition, onDelete}) => {
+
   return (
     <div className="group relative flex items-start gap-2 rounded-xl group-hover:bg-amber-400">
       <button
@@ -24,14 +25,15 @@ const Note = ({ cue, definition, onDelete,name }) => {
         className="field-sizing-content w-2/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-1 focus:ring-sky-300 focus:ring-offset-2"
         type="text"
         placeholder={definition}
-        name="defintion"
+        name="definition"
       />
     </div>
   );
 };
 
-const CornellNoteTaking = () => {
+const CornellNoteTaking = ({bookId}) => {
   const today = new Date().toDateString();
+  const [book, setBook] = useState(bookId);
 
   const [cornellNote, setCornellNote] = useState({
     title: "",
@@ -67,15 +69,13 @@ const CornellNoteTaking = () => {
     }));
   };
 
-  const handleCornellNoteSave = () => {
-    console.log(cornellNote);
-  };
 
   return (
     <form className="max-h-175 max-w-1/2 min-w-1/2 space-y-2 text-stone-700" action={writeNotes}>
       <h2 className="flex items-center gap-2 font-semibold tracking-wide text-stone-400">
         <NotepadTextDashed /> Make your Cornell note here.
       </h2>
+      <input type="hidden" name="book_id" value={book || ""} />
       {/* Head of the note */}
       <div className="flex justify-between rounded-xl bg-sky-200 p-5">
         <div className="w-1/3">{today}</div>
@@ -125,7 +125,7 @@ const CornellNoteTaking = () => {
         </button>
         <button
           className="w-1/2 rounded-xl bg-sky-500 p-5 text-lg font-semibold tracking-wide text-sky-50 hover:cursor-pointer hover:bg-sky-50 hover:text-sky-500 hover:shadow"
-          
+          // onClick={()=>console.log(bookId)}
         >
           Save
         </button>

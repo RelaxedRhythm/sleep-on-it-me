@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+
 import CornellNoteTaking from "@/components/desk-components/cornell-note";
 import NotebookSummary from "@/components/desk-components/summary";
 import Pomodoro from "@/components/desk-components/pomodoro";
@@ -12,16 +14,21 @@ import { fetchBooks, fetchNotes } from "@/library/actions";
 
 const Desk = () => {
   const [shelf, setShelf] = useState();
+  const [selectedBookId, setSelectedBookId] = useState(null);
   const [notes, setNotes] = useState();
-
+  const { data: session,status } = useSession();
+  const userid = session?.user?.id;
+  
   // populate books
   const getBooks = async () => {
-    const res = await fetchBooks("bf6c94b0-ab38-4115-a430-b5633c302570  ");
+    const res = await fetchBooks(userid);
     setShelf(res);
   };
 
   // filter notes
   const getNotes = async (id) => {
+    setSelectedBookId(id);
+    console.log("book clicked", selectedBookId);
     const res = await fetchNotes(id);
     setNotes(res);
   };
@@ -46,7 +53,7 @@ const Desk = () => {
       <div className="space-y-4 px-6">
         <NotebookSummary />
         <div className="flex items-start justify-around">
-          <CornellNoteTaking />
+          <CornellNoteTaking bookId={selectedBookId} />
           <Pomodoro />
         </div>
       </div>

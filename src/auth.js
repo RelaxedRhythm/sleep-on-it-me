@@ -15,7 +15,7 @@ export const {handlers,auth,signIn,signOut} = NextAuth({
       },
       async authorize(credentials) {
         try {
-          console.log("auth");
+          // console.log("auth");
           if (!credentials) return null;
           const { identifier, password } = credentials;
 
@@ -26,7 +26,7 @@ export const {handlers,auth,signIn,signOut} = NextAuth({
             [identifier],
           );
 
-          console.log("query result", result);
+          // console.log("query result", result);
 
           if (!result.rowCount) {
             // throw new Error("No user found with these credentials");
