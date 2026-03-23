@@ -85,13 +85,13 @@ function TimerDisplay({
   );
 }
 
-export default function Pomodoro() {
+export default function Pomodoro({bookId,userId}) {
   const timers = {
     shortBreak: 300,
     longBreak: 900,
     study: 1500,
   };
-
+  console.log("pomodoro rendered", bookId, userId);
   const [mode, setMode] = useState("study"); // shortbreak || longbreak
   const [timeLeft, setTimeLeft] = useState(timers.study); //to update timer
   const [isPaused, setIsPaused] = useState(false); // see if timer paused

@@ -2,7 +2,7 @@ import { BookPlus, Library, NotebookText } from "lucide-react";
 import AddBook from "./addbook";
 import Book from "./book";
 
-async function BookShelf({ userId, selectNotes }) {
+async function BookShelf() {
   const books = await fetchBooks(userId);
 
   return (

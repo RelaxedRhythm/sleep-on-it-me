@@ -99,7 +99,17 @@ async function fetchNotes(bookId) {
 }
 
 // write to db
-async function writeBooks() {}
+async function writeBooks(userId) {
+    try{
+        const user_id=userId;
+        const title='untitled'
+        console.log(userId);
+        const newBook=await client.query('INSERT INTO books(user_id,title) VALUES($1,$2) returning*;',[user_id,title]);
+        return newBook.rows[0];
+    }catch(err){
+      console.log('error in adding book',err);
+    }
+}
 async function writeTodo(task) {
   client.query();
   const name = task.name;
@@ -165,6 +175,26 @@ async function updateTodo(id, task, status) {
   } catch (err) {
     console.error(err.message);
     return null;
+  }
+}
+
+async function updateBooks(id,title){
+  try{
+    const result=await client.query("UPDATE books SET title=$1 WHERE id=$2 RETURNING *;",[title,id]);
+    return result.rows[0];
+  }catch(err){
+    console.error(err.message);
+    return null;
+  }
+}
+
+async function writeSession(){
+
+  try{
+
+    const session= await client.query("INSERT INTO session (user_id,book_id,session_num,session_date) values($1,$2,$3,$4) returning id",[1, 1, 1, new Date()]);
+  }catch(err){
+    console.log("Error msg",err);
   }
 }
 

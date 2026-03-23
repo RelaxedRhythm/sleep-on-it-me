@@ -11,6 +11,7 @@ import Book from "@/components/desk-components/books/book";
 import BookShelf from "@/components/desk-components/books/book-shelf";
 import Account from "@/components/desk-components/account";
 import { fetchBooks, fetchNotes } from "@/library/actions";
+import AddBook from "@/components/desk-components/books/addbook";
 
 const Desk = () => {
   const [shelf, setShelf] = useState();
@@ -18,7 +19,7 @@ const Desk = () => {
   const [notes, setNotes] = useState();
   const { data: session,status } = useSession();
   const userid = session?.user?.id;
-  
+  const user = session?.user;
   // populate books
   const getBooks = async () => {
     const res = await fetchBooks(userid);
@@ -36,17 +37,19 @@ const Desk = () => {
   return (
     <div className="flex h-full">
       {/* books navigation */}
-      <SidePanel label="Active Notebook Title">
+      <SidePanel label={selectedBookId ? shelf.find((book) => book.id === selectedBookId)?.title : "No Book Selected"}>
         <div className="h-40 w-full rounded-b-lg bg-purple-500 text-purple-50"></div>
         <button onClick={getBooks}>fetchUser</button>
         {shelf
           ? shelf.map((book) => (
               <Book key={book.id} data={book} getNotes={getNotes} />
             ))
-          : "not populated yet"}
+          : "not populated yet"
+        }
 
+        <AddBook userId={userid}/>
         {/* <BookShelf userId={user.id} /> */}
-        <div className="mt-auto">{/* <Account user={user.username} /> */}</div>
+        <div className="mt-auto"><Account user={user} /></div>
       </SidePanel>
 
       {/* workarea */}
@@ -54,7 +57,7 @@ const Desk = () => {
         <NotebookSummary />
         <div className="flex items-start justify-around">
           <CornellNoteTaking bookId={selectedBookId} />
-          <Pomodoro />
+          <Pomodoro userId={userid} bookId={selectedBookId} />
         </div>
       </div>
 
