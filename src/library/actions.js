@@ -188,6 +188,20 @@ async function updateBooks(id,title){
   }
 }
 
+async function deleteBooks(id){
+  try{
+    const deletedBook=await client.query("SELECT * FROM books WHERE id=$1",[id]);
+    if (deletedBook.rowCount === 0) {
+    console.log("error: cant delete ....");
+    return;
+  }
+  await client.query("DELETE FROM books where id=$1", [id]);
+  console.log("deletion success");
+  }  catch(err){
+    console.log("error in deleting book",err);
+    return;
+  }
+}
 async function writeSession(){
 
   try{
@@ -211,4 +225,7 @@ export {
   writeTodo,
   deleteTodos,
   updateTodo,
+  updateBooks,
+  deleteBooks,
+  writeSession
 };
