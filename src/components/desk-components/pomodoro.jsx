@@ -127,9 +127,9 @@ export default function Pomodoro({bookId,userId}) {
 
   const handleSessionComplete = async () => {
     if (mode === "study") {
-      await completeSession(sessionId);
       const next = pomodoro + 1;
-      if (next === 5) {
+      if (next%4===0) {
+        await completeSession(sessionId);
         setPomodoros(0);
         setSessions(session + 1);
         setMode("longBreak");
@@ -140,6 +140,15 @@ export default function Pomodoro({bookId,userId}) {
         setTimeLeft(timers.shortBreak);
       }
     } else {
+      if (mode === "longBreak") {
+        const id = await writeSession({
+          userId,
+          bookId,
+          sessionNum: session + 1
+        });
+
+        setSessionId(id);
+    }
       setMode("study");
       setTimeLeft(timers.study);
     }
