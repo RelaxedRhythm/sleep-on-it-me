@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { VolumeX, Volume2 } from "lucide-react";
 
+import {completeSession, writeSession} from "../../library/actions";
+
 import ToDo from "./to-do";
 function Controls({ onReset, onStart, isStarted, isPaused }) {
   return (
@@ -87,11 +89,11 @@ function TimerDisplay({
 
 export default function Pomodoro({bookId,userId}) {
   const timers = {
-    shortBreak: 300,
-    longBreak: 900,
-    study: 1500,
+    shortBreak: 5,
+    longBreak: 15,
+    study: 10,
   };
-  console.log("pomodoro rendered", bookId, userId);
+  // console.log("pomodoro rendered", bookId, userId);
   const [mode, setMode] = useState("study"); // shortbreak || longbreak
   const [timeLeft, setTimeLeft] = useState(timers.study); //to update timer
   const [isPaused, setIsPaused] = useState(false); // see if timer paused
@@ -99,6 +101,9 @@ export default function Pomodoro({bookId,userId}) {
   const [session, setSessions] = useState(1); // count number of sessions
   const [isStarted, setIsStarted] = useState(false);
   const [sound, setSound] = useState(true);
+
+  const [sessionId,setSessionId] = useState(null);
+
 
   const audioRef = useRef(null);
 
@@ -120,8 +125,9 @@ export default function Pomodoro({bookId,userId}) {
     });
   };
 
-  const handleSessionComplete = () => {
+  const handleSessionComplete = async () => {
     if (mode === "study") {
+      await completeSession(sessionId);
       const next = pomodoro + 1;
       if (next === 5) {
         setPomodoros(0);
@@ -153,8 +159,19 @@ export default function Pomodoro({bookId,userId}) {
   };
   //
 
-  const start = () => {
+  const start = async() => {
+    console.log("start clicked", bookId, userId);
     if (!isStarted) {
+      console.log("Calling writeSession");
+      const id=await writeSession({
+      userId,
+      bookId,
+      sessionNum: session
+    });
+
+    console.log("Returned id:", id);
+
+      setSessionId(id);
       setIsStarted(true);
       setIsPaused(false);
     } else {

@@ -29,7 +29,6 @@ const Desk = () => {
   // filter notes
   const getNotes = async (id) => {
     setSelectedBookId(id);
-    console.log("book clicked", selectedBookId);
     const res = await fetchNotes(id);
     setNotes(res);
   };

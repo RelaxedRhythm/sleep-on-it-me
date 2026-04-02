@@ -131,6 +131,10 @@ async function writeNotes(formData) {
   const summary = formData.get("summary");
   const title = formData.get("title");
   const book_id = formData.get("book_id");
+  if (!book_id) {
+  console.log("No book selected");
+  return;
+}
   // console.log(summary);
   const notes = await client.query(
     "INSERT INTO notes(session_id,pomodoro_id,title,summary,book_id) values($1,$2,$3,$4,$5) returning id",
@@ -202,16 +206,25 @@ async function deleteBooks(id){
     return;
   }
 }
-async function writeSession(){
-
+async function writeSession({bookId,userId,sessionNum}){
+  console.log("session details",bookId,userId,sessionNum);
   try{
-
-    const session= await client.query("INSERT INTO session (user_id,book_id,session_num,session_date) values($1,$2,$3,$4) returning id",[1, 1, 1, new Date()]);
+    const session= await client.query("INSERT INTO sessions (user_id,book_id,session_num,started_at,session_date) values($1,$2,$3,NOW(),$4) returning id",[userId, bookId, sessionNum, new Date()]);
+     console.log("Query result:", session.rows);
+    return session.rows[0].id;
   }catch(err){
     console.log("Error msg",err);
   }
 }
 
+async function completeSession(sessionId){
+  try{
+    const completed=await client.query("UPDATE sessions SET completed_at=$1 WHERE id=$2 RETURNING* ;",[new Date(),sessionId]);
+    return completed.rows[0];
+  }   catch(err){
+    console.log("Error in completing session",err);
+  }
+}
 export {
   signup,
   // makeUser,
@@ -227,5 +240,6 @@ export {
   updateTodo,
   updateBooks,
   deleteBooks,
-  writeSession
+  writeSession,
+  completeSession,
 };

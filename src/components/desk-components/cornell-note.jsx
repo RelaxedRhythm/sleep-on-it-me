@@ -33,8 +33,8 @@ const Note = ({ cue, definition, onDelete}) => {
 
 const CornellNoteTaking = ({bookId}) => {
   const today = new Date().toDateString();
-  const [book, setBook] = useState(bookId);
-
+  const book = bookId;
+  console.log(book);
   const [cornellNote, setCornellNote] = useState({
     title: "",
     kvp: [
@@ -75,7 +75,7 @@ const CornellNoteTaking = ({bookId}) => {
       <h2 className="flex items-center gap-2 font-semibold tracking-wide text-stone-400">
         <NotepadTextDashed /> Make your Cornell note here.
       </h2>
-      <input type="hidden" name="book_id" value={book || ""} />
+      <input type="hidden" name="book_id" value={book ?? ""} />
       {/* Head of the note */}
       <div className="flex justify-between rounded-xl bg-sky-200 p-5">
         <div className="w-1/3">{today}</div>
@@ -125,6 +125,7 @@ const CornellNoteTaking = ({bookId}) => {
         </button>
         <button
           className="w-1/2 rounded-xl bg-sky-500 p-5 text-lg font-semibold tracking-wide text-sky-50 hover:cursor-pointer hover:bg-sky-50 hover:text-sky-500 hover:shadow"
+          disabled={!bookId}
           // onClick={()=>console.log(bookId)}
         >
           Save
