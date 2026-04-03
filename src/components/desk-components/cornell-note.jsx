@@ -3,8 +3,7 @@ import { useState } from "react";
 import { NotepadTextDashed, Plus, Trash2 } from "lucide-react";
 import { writeNotes } from "@/library/actions";
 
-const Note = ({ cue, definition, onDelete}) => {
-
+const Note = ({ cue, definition, onDelete }) => {
   return (
     <div className="group relative flex items-start gap-2 rounded-xl group-hover:bg-amber-400">
       <button
@@ -14,7 +13,7 @@ const Note = ({ cue, definition, onDelete}) => {
       >
         <Trash2 />
       </button>
-      
+
       <textarea
         className="field-sizing-content w-1/3 rounded-xl bg-sky-100 p-5 outline-none peer-hover:bg-red-300 focus:ring-1 focus:ring-sky-300 focus:ring-offset-2"
         type="text"
@@ -31,10 +30,11 @@ const Note = ({ cue, definition, onDelete}) => {
   );
 };
 
-const CornellNoteTaking = ({bookId}) => {
+const CornellNoteTaking = ({ bookId, sessionId, session, pomodoro }) => {
   const today = new Date().toDateString();
   const book = bookId;
-  console.log(book);
+  // console.log(book);
+  console.log("pomodoro num",pomodoro)
   const [cornellNote, setCornellNote] = useState({
     title: "",
     kvp: [
@@ -69,13 +69,21 @@ const CornellNoteTaking = ({bookId}) => {
     }));
   };
 
-
   return (
-    <form className="max-h-175 max-w-1/2 min-w-1/2 space-y-2 text-stone-700" action={writeNotes}>
+    <form
+      className="max-h-175 max-w-1/2 min-w-1/2 space-y-2 text-stone-700"
+      action={writeNotes}
+    >
       <h2 className="flex items-center gap-2 font-semibold tracking-wide text-stone-400">
         <NotepadTextDashed /> Make your Cornell note here.
       </h2>
+
+      {/* //hidden inputs to send additional data to the action function without user input */}
       <input type="hidden" name="book_id" value={book ?? ""} />
+      <input type="hidden" name="session_id" value={sessionId ?? ""} />
+      <input type="hidden" name="session_num" value={session ?? 0} />
+      <input type="hidden" name="pomodoro_num" value={pomodoro ?? 0} />
+      
       {/* Head of the note */}
       <div className="flex justify-between rounded-xl bg-sky-200 p-5">
         <div className="w-1/3">{today}</div>

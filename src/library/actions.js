@@ -4,6 +4,7 @@ import { client } from "./db";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { signUpFormSchema } from "./validation";
+import { number } from "zod";
 
 // user sign up
 async function signup(state, formData) {
@@ -131,14 +132,23 @@ async function writeNotes(formData) {
   const summary = formData.get("summary");
   const title = formData.get("title");
   const book_id = formData.get("book_id");
+  const session_id = formData.get("session_id");
+  const session_num = formData.get("session_num");
+  const pomodoro_num = Number(
+    formData.get("pomodoro_num")) ||  0;
   if (!book_id) {
   console.log("No book selected");
   return;
 }
+  if(!session_id){
+    console.log("No session found");
+    return;
+  }
+  // console.log("note details",title,summary,book_id,session_id,session_num,pomodoro_num);
   // console.log(summary);
   const notes = await client.query(
-    "INSERT INTO notes(session_id,pomodoro_id,title,summary,book_id) values($1,$2,$3,$4,$5) returning id",
-    [1, 2, title, summary, book_id],
+    "INSERT INTO notes(session_id,pomodoro_num,title,summary,session_num,book_id) values($1,$2,$3,$4,$5,$6) returning id",
+    [session_id, pomodoro_num, title, summary, session_num, book_id],
   );
   const note_id = notes.rows[0].id;
   const keys = formData.getAll("key");

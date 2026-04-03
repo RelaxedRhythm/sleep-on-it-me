@@ -20,6 +20,11 @@ const Desk = () => {
   const { data: session,status } = useSession();
   const userid = session?.user?.id;
   const user = session?.user;
+
+  const [pomodoro_num, setPomodoro_num] = useState(1); //count number of pomodoro
+  const [session_num, setSessions_num] = useState(1); // count number of sessions
+  const [sessionId,setSessionId] = useState(null);
+
   // populate books
   const getBooks = async () => {
     const res = await fetchBooks(userid);
@@ -55,8 +60,8 @@ const Desk = () => {
       <div className="space-y-4 px-6">
         <NotebookSummary />
         <div className="flex items-start justify-around">
-          <CornellNoteTaking bookId={selectedBookId} />
-          <Pomodoro userId={userid} bookId={selectedBookId} />
+          <CornellNoteTaking sessionId={sessionId} session={session_num} pomodoro={pomodoro_num} bookId={selectedBookId} />
+          <Pomodoro userId={userid} bookId={selectedBookId} sessionId={sessionId} setSessionId={setSessionId} pomodoro={pomodoro_num} setPomodoro={setPomodoro_num} session={session_num} setSessions={setSessions_num} />
         </div>
       </div>
 

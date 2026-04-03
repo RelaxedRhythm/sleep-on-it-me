@@ -87,7 +87,7 @@ function TimerDisplay({
   );
 }
 
-export default function Pomodoro({bookId,userId}) {
+export default function Pomodoro({bookId,userId,sessionId,setSessionId,pomodoro,setPomodoro,session,setSessions}) {
   const timers = {
     shortBreak: 5,
     longBreak: 15,
@@ -97,12 +97,11 @@ export default function Pomodoro({bookId,userId}) {
   const [mode, setMode] = useState("study"); // shortbreak || longbreak
   const [timeLeft, setTimeLeft] = useState(timers.study); //to update timer
   const [isPaused, setIsPaused] = useState(false); // see if timer paused
-  const [pomodoro, setPomodoros] = useState(1); //count number of pomodoro
-  const [session, setSessions] = useState(1); // count number of sessions
+  
   const [isStarted, setIsStarted] = useState(false);
   const [sound, setSound] = useState(true);
 
-  const [sessionId,setSessionId] = useState(null);
+  
 
 
   const audioRef = useRef(null);
@@ -128,14 +127,14 @@ export default function Pomodoro({bookId,userId}) {
   const handleSessionComplete = async () => {
     if (mode === "study") {
       const next = pomodoro + 1;
-      if (next%4===0) {
+      if (next>4) {
         await completeSession(sessionId);
-        setPomodoros(0);
+        setPomodoro(1);
         setSessions(session + 1);
         setMode("longBreak");
         setTimeLeft(timers.longBreak);
       } else {
-        setPomodoros(next);
+        setPomodoro(next);
         setMode("shortBreak");
         setTimeLeft(timers.shortBreak);
       }
@@ -152,6 +151,7 @@ export default function Pomodoro({bookId,userId}) {
       setMode("study");
       setTimeLeft(timers.study);
     }
+    console.log("pomodoro/session details", {bookId, userId, sessionId, pomodoro, session});
   };
 
   useEffect(() => {
@@ -216,3 +216,12 @@ export default function Pomodoro({bookId,userId}) {
     </div>
   );
 }
+
+//todo::
+//make the timer persisist on refresh so that users can track their sessions and pomodoros over time
+
+//change the db of notes and include session_id as uuid and pomodoro_num as integer , session_num as integer. so that we can connect the notes taken to the session and pomodoro in which they were taken
+
+//connect the session and pomodoro number to the notes taken in the cornell note taking component. so that users can track which notes were taken in which session and pomodoro
+
+//display the notes acc to the session and pomodoro count. so that users can track which notes were taken in which session and pomodoro
