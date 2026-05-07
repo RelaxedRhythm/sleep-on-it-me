@@ -93,7 +93,7 @@ async function fetchBooks(userId) {
   return books.rows;
 }
 async function fetchNotes(bookId) {
-  const notes = await client.query("SELECT * FROM notes WHERE book_id = $1", [
+  const notes = await client.query("SELECT n.* FROM notes n JOIN sessions s ON n.session_id = s.id WHERE s.book_id = $1", [
     bookId,
   ]);
   return notes.rows;
@@ -131,24 +131,21 @@ async function writeTodo(task) {
 async function writeNotes(formData) {
   const summary = formData.get("summary");
   const title = formData.get("title");
-  const book_id = formData.get("book_id");
   const session_id = formData.get("session_id");
   const session_num = formData.get("session_num");
   const pomodoro_num = Number(
     formData.get("pomodoro_num")) ||  0;
-  if (!book_id) {
-  console.log("No book selected");
-  return;
-}
+//   if (!book_id) {
+//   console.log("No book selected");
+//   return;
+// }
   if(!session_id){
     console.log("No session found");
     return;
-  }
-  // console.log("note details",title,summary,book_id,session_id,session_num,pomodoro_num);
-  // console.log(summary);
+  } 
   const notes = await client.query(
-    "INSERT INTO notes(session_id,pomodoro_num,title,summary,session_num,book_id) values($1,$2,$3,$4,$5,$6) returning id",
-    [session_id, pomodoro_num, title, summary, session_num, book_id],
+    "INSERT INTO notes(session_id,pomodoro_num,title,summary,session_num) values($1,$2,$3,$4,$5) returning id",
+    [session_id, pomodoro_num, title, summary, session_num],
   );
   const note_id = notes.rows[0].id;
   const keys = formData.getAll("key");
@@ -216,9 +213,14 @@ async function deleteBooks(id){
     return;
   }
 }
+
 async function writeSession({bookId,userId,sessionNum}){
   console.log("session details",bookId,userId,sessionNum);
   try{
+    if(!bookId || !userId || !sessionNum){
+      console.log("missing session details");
+      return;
+    }
     const session= await client.query("INSERT INTO sessions (user_id,book_id,session_num,started_at,session_date) values($1,$2,$3,NOW(),$4) returning id",[userId, bookId, sessionNum, new Date()]);
      console.log("Query result:", session.rows);
     return session.rows[0].id;
@@ -233,6 +235,19 @@ async function completeSession(sessionId){
     return completed.rows[0];
   }   catch(err){
     console.log("Error in completing session",err);
+  }
+}
+
+async function searchByTitle(title, bookId,date){
+  try{
+    const result=await client.query(`SELECT n.* FROM notes n JOIN sessions s ON n.session_id = s.id 
+      WHERE s.book_id = $1 
+      AND ($2::text IS NULL OR n.title ILIKE $2) 
+      AND ($3::DATE IS NULL OR DATE(n.created_at) = $3) 
+      order by n.created_at desc;`,
+      [bookId, `%${title}%`, date]);  
+  }catch(err){
+    console.log("Error in searching note by title",err);
   }
 }
 export {
@@ -252,4 +267,5 @@ export {
   deleteBooks,
   writeSession,
   completeSession,
+  searchByTitle,
 };
