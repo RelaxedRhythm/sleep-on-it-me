@@ -1,17 +1,27 @@
 const navigationLinks = [
   {
     id: 1,
-    name: "Home",
+    name: "Dashboard",
     url: "/home",
   },
   {
     id: 2,
-    name: "Desk",
+    name: "Notebooks",
     url: "/desk",
   },
+  // {
+  //   id: 3,
+  //   name: "History",
+  //   url: "/history",
+  // },
   {
     id: 3,
-    name: "Signout",
+    name: "Profile",
+    url: "/profile",
+  },
+  {
+    id: 4,
+    name: "Logout",
     url: "/",
   },
 ];

@@ -250,6 +250,153 @@ async function searchByTitle(title, bookId,date){
     console.log("Error in searching note by title",err);
   }
 }
+
+async function getDashboardStats(userId) {
+  try {
+    // Topics: number of books
+    const topicsResult = await client.query("SELECT COUNT(*) as count FROM books WHERE user_id = $1", [userId]);
+    const topics = parseInt(topicsResult.rows[0].count);
+
+    // Notes: number of notes
+    const notesResult = await client.query(`
+      SELECT COUNT(n.*) as count FROM notes n 
+      JOIN sessions s ON n.session_id = s.id 
+      WHERE s.user_id = $1
+    `, [userId]);
+    const notesCount = parseInt(notesResult.rows[0].count);
+
+    // Study Time: sum of pomodoro_num * 25 minutes
+    const studyTimeResult = await client.query(`
+      SELECT COALESCE(SUM(pomodoro_num), 0) as total FROM notes n 
+      JOIN sessions s ON n.session_id = s.id 
+      WHERE s.user_id = $1
+    `, [userId]);
+    const studyTimeMinutes = parseInt(studyTimeResult.rows[0].total) * 25;
+    const studyTimeHours = Math.floor(studyTimeMinutes / 60);
+
+    // Streak: number of active days in last 30 days (simplified)
+    const activeDaysResult = await client.query(`
+      SELECT COUNT(DISTINCT DATE(session_date)) as active_days
+      FROM sessions 
+      WHERE user_id = $1 
+      AND session_date >= CURRENT_DATE - INTERVAL '30 days'
+    `, [userId]);
+    const streak = parseInt(activeDaysResult.rows[0].active_days);
+
+    return {
+      streak,
+      topics,
+      studyTime: studyTimeHours,
+      notesCount
+    };
+  } catch (err) {
+    console.error("Error getting dashboard stats:", err);
+    return { streak: 0, topics: 0, studyTime: 0, notesCount: 0 };
+  }
+}
+
+async function getRecentActivity(userId) {
+  try {
+    const result = await client.query(`
+      SELECT n.title, n.created_at, b.title as book_title
+      FROM notes n 
+      JOIN sessions s ON n.session_id = s.id 
+      JOIN books b ON s.book_id = b.id
+      WHERE s.user_id = $1 
+      ORDER BY n.created_at DESC 
+      LIMIT 5
+    `, [userId]);
+    return result.rows.map(row => ({
+      title: row.title,
+      book: row.book_title,
+      date: row.created_at
+    }));
+  } catch (err) {
+    console.error("Error getting recent activity:", err);
+    return [];
+  }
+}
+
+async function getUserNotebooks(userId) {
+  try {
+    const result = await client.query(`
+      SELECT id, title, created_at
+      FROM books 
+      WHERE user_id = $1 
+      ORDER BY created_at DESC LIMIT 5
+    `, [userId]);
+    return result.rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      lastEdited: row.created_at
+    }));
+  } catch (err) {
+    console.error("Error getting user notebooks:", err);
+    return [];
+  }
+}
+
+async function getProfileData(userId) {
+  try {
+    // Get user join date
+    const userResult = await client.query("SELECT created_at FROM users WHERE id = $1", [userId]);
+    const joinDate = userResult.rows[0]?.created_at;
+
+    // Get total books
+    const booksResult = await client.query("SELECT COUNT(*) as count FROM books WHERE user_id = $1", [userId]);
+    const totalBooks = parseInt(booksResult.rows[0].count);
+
+    // Get total notes
+    const notesResult = await client.query(`
+      SELECT COUNT(n.*) as count FROM notes n 
+      JOIN sessions s ON n.session_id = s.id 
+      WHERE s.user_id = $1
+    `, [userId]);
+    const totalNotes = parseInt(notesResult.rows[0].count);
+
+    // Get total study time
+    const studyTimeResult = await client.query(`
+      SELECT COALESCE(SUM(pomodoro_num), 0) as total FROM notes n 
+      JOIN sessions s ON n.session_id = s.id 
+      WHERE s.user_id = $1
+    `, [userId]);
+    const totalStudyTime = Math.floor((parseInt(studyTimeResult.rows[0].total) * 25) / 60);
+
+    return {
+      totalBooks,
+      totalNotes,
+      totalStudyTime,
+      joinDate
+    };
+  } catch (err) {
+    console.error("Error getting profile data:", err);
+    return { totalBooks: 0, totalNotes: 0, totalStudyTime: 0, joinDate: null };
+  }
+}
+
+async function getStudyHeatmap(userId) {
+  try {
+    const result = await client.query(`
+      SELECT 
+        DATE(session_date) as day,
+        COUNT(*) as sessions
+      FROM sessions
+      WHERE user_id = $1
+      AND session_date >= CURRENT_DATE - INTERVAL '365 days'
+      GROUP BY day
+      ORDER BY day
+    `, [userId]);
+
+    return result.rows.map(row => ({
+      date: row.day,
+      count: parseInt(row.sessions)
+    }));
+
+  } catch (err) {
+    console.error("Error getting heatmap:", err);
+    return [];
+  }
+}
 export {
   signup,
   // makeUser,
@@ -268,4 +415,9 @@ export {
   writeSession,
   completeSession,
   searchByTitle,
+  getDashboardStats,
+  getRecentActivity,
+  getUserNotebooks,
+  getProfileData,
+  getStudyHeatmap
 };
