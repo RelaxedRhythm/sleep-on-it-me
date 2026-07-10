@@ -100,7 +100,7 @@ export async function PUT(request) {
     }
 
     const body = await request.json();
-    const { noteId, title, summary } = body || {};
+    const { noteId, title, summary, keyValuePairs } = body || {};
 
     if (!noteId) {
       return NextResponse.json({ error: "Note id is required" }, { status: 400 });
@@ -111,7 +111,26 @@ export async function PUT(request) {
       [title, summary, noteId],
     );
 
-    return NextResponse.json({ ok: true, note: result.rows[0] || null });
+    const normalizedPairs = (Array.isArray(keyValuePairs) ? keyValuePairs : [])
+      .filter((item) => item?.cue || item?.content)
+      .map((item) => ({ cue: item.cue ?? "", content: item.content ?? "" }));
+
+    await client.query("DELETE FROM note_details WHERE note_id = $1", [noteId]);
+
+    for (const pair of normalizedPairs) {
+      await client.query(
+        "INSERT INTO note_details (cue, content, note_id) VALUES ($1, $2, $3)",
+        [pair.cue, pair.content, noteId],
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      note: {
+        ...(result.rows[0] || null),
+        key_value_pairs: normalizedPairs,
+      },
+    });
   } catch (error) {
     console.error("Notes PUT error:", error);
     return NextResponse.json({ error: "Unable to update note" }, { status: 500 });

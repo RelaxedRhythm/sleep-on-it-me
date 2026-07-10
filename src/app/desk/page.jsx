@@ -1,5 +1,5 @@
 "use client";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
@@ -10,28 +10,24 @@ import Pomodoro from "@/components/desk-components/pomodoro";
 import SidePanel from "@/components/desk-components/side-navigation-panels";
 import { Note } from "@/components/desk-components/notes/notes";
 import Book from "@/components/desk-components/books/book";
-import BookShelf from "@/components/desk-components/books/book-shelf";
 import Account from "@/components/desk-components/account";
 import { fetchNotes } from "@/library/actions";
 import AddBook from "@/components/desk-components/books/addbook";
 
 const Desk = () => {
-  
-  const { data: session,status } = useSession();
+  const { data: session, status } = useSession();
   const [shelf, setShelf] = useState([]);
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [notes, setNotes] = useState([]);
-  const [bookQuery, setBookQuery] = useState("");
   const [bookPage, setBookPage] = useState(1);
   const booksPerPage = 8;
   const userid = session?.user?.id;
   const user = session?.user;
 
-  const [pomodoro_num, setPomodoro_num] = useState(1); //count number of pomodoro
-  const [session_num, setSessions_num] = useState(1); // count number of sessions
-  const [sessionId,setSessionId] = useState(null);
-  const [todos,setTodos] = useState([]);
-  const [noteQuery, setNoteQuery] = useState("");
+  const [pomodoro_num, setPomodoro_num] = useState(1);
+  const [session_num, setSessions_num] = useState(1);
+  const [sessionId, setSessionId] = useState(null);
+  const [todos, setTodos] = useState([]);
   const [notePage, setNotePage] = useState(1);
   const notesPerPage = 8;
   const [bookSearch, setBookSearch] = useState("");
@@ -41,50 +37,75 @@ const Desk = () => {
   const [selectedNote, setSelectedNote] = useState(null);
   const [modalError, setModalError] = useState(null);
   const [isEditingNote, setIsEditingNote] = useState(false);
-  const [draftNote, setDraftNote] = useState({ title: "", summary: "" });
+  const [draftNote, setDraftNote] = useState({ title: "", summary: "", keyValuePairs: [] });
 
   useEffect(() => {
-      if (status === "authenticated") {
-        fetch('/api/desk')
-          .then(res => res.json())
-          .then(data => {
-            setShelf(data.books || []);
-            setTodos(data.todos || []);
-            setSelectedBookId(data.selectedBookId);
-            setNotes(data.notes || []);
-          })
-          .catch(err => {
-            console.error('Error fetching desk data:', err);
-            setModalError('We could not load your desk data right now. Please refresh and try again.');
-          });
-      }
-    }, [status]);
+    if (status === "authenticated") {
+      fetch("/api/desk")
+        .then((res) => res.json())
+        .then((data) => {
+          setShelf(data.books || []);
+          setTodos(data.todos || []);
+          setSelectedBookId(data.selectedBookId);
+          setNotes(data.notes || []);
+        })
+        .catch((err) => {
+          console.error("Error fetching desk data:", err);
+          setModalError("We could not load your desk data right now. Please refresh and try again.");
+        });
+    }
+  }, [status]);
+
+  const refreshNotes = async (bookId = selectedBookId) => {
+    if (!bookId) {
+      setNotes([]);
+      return;
+    }
+
+    try {
+      const bookNotes = await fetchNotes(bookId);
+      setNotes(bookNotes || []);
+    } catch (err) {
+      console.error("Error loading notes for selected book:", err);
+      setNotes([]);
+    }
+  };
 
   useEffect(() => {
-    if (!selectedBookId) return;
-
-    const refreshNotes = async () => {
-      try {
-        const bookNotes = await fetchNotes(selectedBookId);
-        setNotes(bookNotes || []);
-      } catch (err) {
-        console.error('Error loading notes for selected book:', err);
-        setNotes([]);
-      }
-    };
-
-    refreshNotes();
+    refreshNotes(selectedBookId);
   }, [selectedBookId]);
 
   const handleSelectBook = (bookId) => {
     if (!bookId) return;
+    setSelectedNote(null);
+    setIsEditingNote(false);
     setNotes([]);
     setSelectedBookId(bookId);
   };
 
+  const handleBookAdded = (newBook) => {
+    if (!newBook?.id) return;
+    setShelf((prevShelf) => [newBook, ...prevShelf]);
+    setSelectedNote(null);
+    setIsEditingNote(false);
+    setNotes([]);
+    setSelectedBookId(newBook.id);
+    setBookPage(1);
+  };
+
   useEffect(() => {
     if (selectedNote) {
-      setDraftNote({ title: selectedNote.title || "", summary: selectedNote.summary || "" });
+      setDraftNote({
+        title: selectedNote.title || "",
+        summary: selectedNote.summary || "",
+        keyValuePairs: Array.isArray(selectedNote.key_value_pairs)
+          ? selectedNote.key_value_pairs.map((item, index) => ({
+              id: item.id ?? `${item.cue || "pair"}-${index}`,
+              cue: item.cue || "",
+              content: item.content || "",
+            }))
+          : [],
+      });
     }
   }, [selectedNote]);
 
@@ -98,8 +119,37 @@ const Desk = () => {
     return !query || ((note.title || "").toLowerCase().includes(query) || (note.summary || "").toLowerCase().includes(query));
   });
 
+  const handleDraftPairChange = (index, field, value) => {
+    setDraftNote((prev) => {
+      const nextPairs = [...prev.keyValuePairs];
+      nextPairs[index] = { ...nextPairs[index], [field]: value };
+      return { ...prev, keyValuePairs: nextPairs };
+    });
+  };
+
+  const handleAddKeyValuePair = () => {
+    setDraftNote((prev) => ({
+      ...prev,
+      keyValuePairs: [
+        ...prev.keyValuePairs,
+        { id: `${Date.now()}-${prev.keyValuePairs.length + 1}`, cue: "", content: "" },
+      ],
+    }));
+  };
+
+  const handleRemoveKeyValuePair = (index) => {
+    setDraftNote((prev) => ({
+      ...prev,
+      keyValuePairs: prev.keyValuePairs.filter((_, pairIndex) => pairIndex !== index),
+    }));
+  };
+
   const handleSaveNote = async () => {
     if (!selectedNote) return;
+
+    const normalizedPairs = draftNote.keyValuePairs
+      .filter((item) => item?.cue || item?.content)
+      .map((item) => ({ cue: item.cue ?? "", content: item.content ?? "" }));
 
     try {
       const response = await fetch("/api/notes", {
@@ -109,6 +159,7 @@ const Desk = () => {
           noteId: selectedNote.id,
           title: draftNote.title,
           summary: draftNote.summary,
+          keyValuePairs: normalizedPairs,
         }),
       });
       const result = await response.json();
@@ -116,8 +167,28 @@ const Desk = () => {
         throw new Error(result?.error || "We could not update this note.");
       }
 
-      setNotes((prevNotes) => prevNotes.map((note) => (note.id === selectedNote.id ? { ...note, title: draftNote.title, summary: draftNote.summary } : note)));
-      setSelectedNote(null);
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === selectedNote.id
+            ? {
+                ...note,
+                title: draftNote.title,
+                summary: draftNote.summary,
+                key_value_pairs: normalizedPairs,
+              }
+            : note,
+        ),
+      );
+      setSelectedNote((prev) =>
+        prev && prev.id === selectedNote.id
+          ? {
+              ...prev,
+              title: draftNote.title,
+              summary: draftNote.summary,
+              key_value_pairs: normalizedPairs,
+            }
+          : prev,
+      );
       setIsEditingNote(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : "We could not update this note. Please try again.";
@@ -138,6 +209,7 @@ const Desk = () => {
       }
 
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== selectedNote.id));
+      await refreshNotes(selectedBookId);
       setSelectedNote(null);
       setIsEditingNote(false);
     } catch (error) {
@@ -150,67 +222,80 @@ const Desk = () => {
 
   return (
     <div className="flex h-full">
-      {/* books navigation */}
       <SidePanel
         label={selectedBookId ? shelf.find((book) => String(book.id) === String(selectedBookId))?.title : "No Book Selected"}
         searchValue={bookSearch}
-        onSearch={(v) => { setBookSearch(v); setBookPage(1); }}
+        onSearch={(v) => {
+          setBookSearch(v);
+          setBookPage(1);
+        }}
         currentPage={bookPage}
         totalPages={Math.max(1, Math.ceil(filteredBooks.length / booksPerPage))}
         onPageChange={(p) => setBookPage(p)}
       >
         <div className="h-40 w-full rounded-b-lg bg-purple-500 text-purple-50"></div>
-        {/* <button onClick={getBooks}>fetchUser</button> */}
-        {(shelf && shelf.length > 0)
-          ? (() => {
-              const start = (bookPage - 1) * booksPerPage;
-              if (filteredBooks.length === 0) {
-                return <p className="px-4 py-3 text-sm text-stone-500">No books match your search.</p>;
-              }
-              return filteredBooks.slice(start, start + booksPerPage).map((book) => (
-                <Book
-                  key={book.id}
-                  data={book}
-                  isSelected={String(book.id) === String(selectedBookId)}
-                  onSelect={handleSelectBook}
-                />
-              ));
-            })()
-          : <p className="px-4 py-3 text-sm text-stone-500">No books yet. Add one to get started.</p>
-        }
+        {(shelf && shelf.length > 0) ? (() => {
+          const start = (bookPage - 1) * booksPerPage;
+          if (filteredBooks.length === 0) {
+            return <p className="px-4 py-3 text-sm text-stone-500">No books match your search.</p>;
+          }
+          return filteredBooks.slice(start, start + booksPerPage).map((book) => (
+            <Book
+              key={book.id}
+              data={book}
+              isSelected={String(book.id) === String(selectedBookId)}
+              onSelect={handleSelectBook}
+            />
+          ));
+        })() : <p className="px-4 py-3 text-sm text-stone-500">No books yet. Add one to get started.</p>}
 
-        <AddBook userId={userid}/>
-        {/* <BookShelf userId={user.id} /> */}
+        <AddBook userId={userid} onBookAdded={handleBookAdded} />
         <div className="mt-auto"><Account user={user} /></div>
       </SidePanel>
 
-      {/* workarea */}
       <div className="space-y-4 px-6">
         <NotebookSummary sessionId={sessionId} sessionName={`session ${session_num}`} />
         <div className="flex items-start justify-around">
-          <CornellNoteTaking sessionId={sessionId} session={session_num} pomodoro={pomodoro_num} bookId={selectedBookId} onError={setModalError} />
-          <Pomodoro userId={userid} bookId={selectedBookId} sessionId={sessionId} setSessionId={setSessionId} pomodoro={pomodoro_num} setPomodoro={setPomodoro_num} session={session_num} setSessions={setSessions_num} todos={todos} />
+          <CornellNoteTaking
+            sessionId={sessionId}
+            session={session_num}
+            pomodoro={pomodoro_num}
+            bookId={selectedBookId}
+            onNoteSaved={() => refreshNotes(selectedBookId)}
+            onError={setModalError}
+          />
+          <Pomodoro
+            userId={userid}
+            bookId={selectedBookId}
+            sessionId={sessionId}
+            setSessionId={setSessionId}
+            pomodoro={pomodoro_num}
+            setPomodoro={setPomodoro_num}
+            session={session_num}
+            setSessions={setSessions_num}
+            todos={todos}
+          />
         </div>
       </div>
 
-      {/* notes navigation */}
       <SidePanel
         label="Notes"
         searchValue={noteSearch}
-        onSearch={(v) => { setNoteSearch(v); setNotePage(1); }}
+        onSearch={(v) => {
+          setNoteSearch(v);
+          setNotePage(1);
+        }}
         currentPage={notePage}
         totalPages={Math.max(1, Math.ceil(filteredNotes.length / notesPerPage))}
         onPageChange={(p) => setNotePage(p)}
       >
-        {(notes && notes.length > 0)
-          ? (() => {
-              const start = (notePage - 1) * notesPerPage;
-              if (filteredNotes.length === 0) {
-                return <p className="px-4 py-3 text-sm text-stone-500">No notes match your search.</p>;
-              }
-              return filteredNotes.slice(start, start + notesPerPage).map((note) => <Note key={note.id} title={note.title} onOpen={() => setSelectedNote(note)} />);
-            })()
-          : <p className="px-4 py-3 text-sm text-stone-500">Select a book to see notes.</p>}
+        {(notes && notes.length > 0) ? (() => {
+          const start = (notePage - 1) * notesPerPage;
+          if (filteredNotes.length === 0) {
+            return <p className="px-4 py-3 text-sm text-stone-500">No notes match your search.</p>;
+          }
+          return filteredNotes.slice(start, start + notesPerPage).map((note) => <Note key={note.id} title={note.title} onOpen={() => setSelectedNote(note)} />);
+        })() : <p className="px-4 py-3 text-sm text-stone-500">Select a book to see notes.</p>}
       </SidePanel>
 
       <Modal
@@ -278,6 +363,47 @@ const Desk = () => {
                   className="min-h-40 w-full rounded-xl border border-stone-300 px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="Note content"
                 />
+
+                <div className="rounded-xl border border-stone-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Key / value pairs</p>
+                    <button
+                      type="button"
+                      onClick={handleAddKeyValuePair}
+                      className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700"
+                    >
+                      Add pair
+                    </button>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    {draftNote.keyValuePairs.map((pair, index) => (
+                      <div key={pair.id ?? `${pair.cue || "pair"}-${index}`} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+                        <textarea
+                          value={pair.cue}
+                          rows={2}
+                          onChange={(event) => handleDraftPairChange(index, "cue", event.target.value)}
+                          className="w-full rounded-xl border border-stone-300 px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
+                          placeholder="Key"
+                        />
+                        <textarea
+                          value={pair.content}
+                          rows={2}
+                          onChange={(event) => handleDraftPairChange(index, "content", event.target.value)}
+                          className="w-full rounded-xl border border-stone-300 px-3 py-2 outline-none focus:ring-2 focus:ring-sky-500"
+                          placeholder="Value"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveKeyValuePair(index)}
+                          className="rounded-full bg-rose-100 px-3 py-2 text-sm font-semibold text-rose-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleSaveNote}
