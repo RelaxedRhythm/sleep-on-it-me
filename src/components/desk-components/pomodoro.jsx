@@ -87,7 +87,7 @@ function TimerDisplay({
   );
 }
 
-export default function Pomodoro({bookId,userId,sessionId,setSessionId,pomodoro,setPomodoro,session,setSessions}) {
+export default function Pomodoro({bookId,userId,sessionId,setSessionId,pomodoro,setPomodoro,session,setSessions , todos}) {
   const timers = {
     shortBreak: 5,
     longBreak: 15,
@@ -212,7 +212,7 @@ export default function Pomodoro({bookId,userId,sessionId,setSessionId,pomodoro,
         isPaused={isPaused}
         sound={sound}
       />
-      <ToDo />
+      <ToDo todos={todos} />
     </div>
   );
 }

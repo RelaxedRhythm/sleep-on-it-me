@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { NotepadTextDashed, Plus, Trash2 } from "lucide-react";
-import { writeNotes } from "@/library/actions";
 
 const Note = ({ cue, definition, onDelete }) => {
   return (
@@ -30,7 +29,7 @@ const Note = ({ cue, definition, onDelete }) => {
   );
 };
 
-const CornellNoteTaking = ({ bookId, sessionId, session, pomodoro }) => {
+const CornellNoteTaking = ({ bookId, sessionId, session, pomodoro, onNoteSaved, onError }) => {
   const today = new Date().toDateString();
   const book = bookId;
   // console.log(book);
@@ -69,10 +68,45 @@ const CornellNoteTaking = ({ bookId, sessionId, session, pomodoro }) => {
     }));
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    try {
+       const response = await fetch("/api/notes", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || "Unable to save note right now.");
+      }
+      // Reset form after successful save
+      setCornellNote({
+        title: "",
+        kvp: [
+          {
+            id: 1,
+            cue: "Key",
+            definition: "Description",
+          },
+        ],
+        summary: "",
+      });
+      // Call callback to refresh notes
+      if (onNoteSaved) {
+        onNoteSaved();
+      }
+    } catch (error) {
+      console.error('Error saving note:', error);
+      onError?.('Unable to save the note right now. Please try again.');
+    }
+  };
+
   return (
     <form
       className="max-h-175 max-w-1/2 min-w-1/2 space-y-2 text-stone-700"
-      action={writeNotes}
+      onSubmit={handleSubmit}
     >
       <h2 className="flex items-center gap-2 font-semibold tracking-wide text-stone-400">
         <NotepadTextDashed /> Make your Cornell note here.
@@ -126,15 +160,26 @@ const CornellNoteTaking = ({ bookId, sessionId, session, pomodoro }) => {
       {/* cornell note actions */}
       <div className="flex gap-2">
         <button
+          type="button"
           className="w-1/2 rounded-xl bg-orange-400 p-5 font-semibold tracking-wide text-orange-50 hover:cursor-pointer hover:bg-orange-50 hover:text-orange-400 hover:shadow"
-          onClick={() => alert("Please save first!")}
+          onClick={() => setCornellNote({
+            title: "",
+            kvp: [
+              {
+                id: 1,
+                cue: "Key",
+                definition: "Description",
+              },
+            ],
+            summary: "",
+          })}
         >
           New Cornell Note
         </button>
         <button
+          type="submit"
           className="w-1/2 rounded-xl bg-sky-500 p-5 text-lg font-semibold tracking-wide text-sky-50 hover:cursor-pointer hover:bg-sky-50 hover:text-sky-500 hover:shadow"
           disabled={!bookId}
-          // onClick={()=>console.log(bookId)}
         >
           Save
         </button>

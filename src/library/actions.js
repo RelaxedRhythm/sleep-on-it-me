@@ -93,10 +93,28 @@ async function fetchBooks(userId) {
   return books.rows;
 }
 async function fetchNotes(bookId) {
-  const notes = await client.query("SELECT n.* FROM notes n JOIN sessions s ON n.session_id = s.id WHERE s.book_id = $1", [
-    bookId,
-  ]);
-  return notes.rows;
+  const notes = await client.query(
+    `SELECT n.*, b.title as book_title,
+     COALESCE(
+       json_agg(
+         json_build_object('cue', nd.cue, 'content', nd.content)
+         ORDER BY nd.id
+       ) FILTER (WHERE nd.id IS NOT NULL),
+       '[]'::json
+     ) AS key_value_pairs
+     FROM notes n
+     JOIN sessions s ON n.session_id = s.id
+     LEFT JOIN books b ON s.book_id = b.id
+     LEFT JOIN note_details nd ON nd.note_id = n.id
+     WHERE s.book_id = $1
+     GROUP BY n.id, b.title
+     ORDER BY n.created_at DESC`,
+    [bookId],
+  );
+  return notes.rows.map((note) => ({
+    ...note,
+    key_value_pairs: Array.isArray(note.key_value_pairs) ? note.key_value_pairs : [],
+  }));
 }
 
 // write to db
@@ -159,6 +177,30 @@ async function writeNotes(formData) {
       "INSERT INTO note_details (cue,content,note_id) values($1,$2,$3);",
       [cue, content, note_id],
     );
+  }
+}
+
+async function updateNote(id, title, summary) {
+  try {
+    const result = await client.query(
+      "UPDATE notes SET title = $1, summary = $2 WHERE id = $3 RETURNING *;",
+      [title, summary, id],
+    );
+    return result.rows[0];
+  } catch (err) {
+    console.error("Error updating note:", err);
+    return null;
+  }
+}
+
+async function deleteNote(id) {
+  try {
+    await client.query("DELETE FROM note_details WHERE note_id = $1", [id]);
+    await client.query("DELETE FROM notes WHERE id = $1", [id]);
+    return true;
+  } catch (err) {
+    console.error("Error deleting note:", err);
+    return false;
   }
 }
 
@@ -407,6 +449,8 @@ export {
   fetchNotes,
   writeBooks,
   writeNotes,
+  updateNote,
+  deleteNote,
   writeTodo,
   deleteTodos,
   updateTodo,

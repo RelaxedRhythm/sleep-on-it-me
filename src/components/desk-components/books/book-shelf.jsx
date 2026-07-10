@@ -3,7 +3,7 @@ import AddBook from "./addbook";
 import Book from "./book";
 
 async function BookShelf() {
-  const books = await fetchBooks(userId);
+  // const books = await fetchBooks(userId);
 
   return (
     <div className="flex h-full flex-col text-lg">

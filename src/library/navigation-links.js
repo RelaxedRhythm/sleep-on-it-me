@@ -6,7 +6,7 @@ const navigationLinks = [
   },
   {
     id: 2,
-    name: "Notebooks",
+    name: "Desk",
     url: "/desk",
   },
   // {
