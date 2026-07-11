@@ -11,8 +11,8 @@ const SidePanel = ({
   const handleNext = () => onPageChange && onPageChange(Math.min(totalPages, currentPage + 1));
 
   return (
-    <div className="relative min-h-full min-w-80">
-      <h2 className="absolute top-0 left-0 z-10 m-2 rounded-sm bg-stone-700/60 px-2 py-0.5 text-sm font-semibold tracking-wider text-white text-shadow-2xs">
+    <div className="relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-stone-200 bg-stone-50/90 p-2 lg:min-w-80 lg:max-w-80">
+      <h2 className="mb-2 rounded-sm bg-stone-700/90 px-2 py-1 text-sm font-semibold tracking-wider text-white">
         {label}
       </h2>
       <input
@@ -20,9 +20,9 @@ const SidePanel = ({
         placeholder="Search..."
         value={searchValue}
         onChange={(e) => onSearch && onSearch(e.target.value)}
-        className="mt-8 w-full bg-stone-700/60 text-white placeholder:text-stone-500 border border-stone-500 focus:outline-none focus:ring-2 focus:ring-blue-500 px-2 py-1"
+        className="mb-2 w-full border border-stone-300 bg-white px-2 py-1 text-sm text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <div className="flex h-full flex-col">{children}</div>
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">{children}</div>
 
       {totalPages > 1 && (
         <div className="mt-2 flex items-center justify-center gap-2">

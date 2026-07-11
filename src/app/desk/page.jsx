@@ -81,6 +81,8 @@ const Desk = () => {
     setIsEditingNote(false);
     setNotes([]);
     setSelectedBookId(bookId);
+    setBookPage(1);
+    setNotePage(1);
   };
 
   const handleBookAdded = (newBook) => {
@@ -91,6 +93,7 @@ const Desk = () => {
     setNotes([]);
     setSelectedBookId(newBook.id);
     setBookPage(1);
+    setNotePage(1);
   };
 
   useEffect(() => {
@@ -118,6 +121,16 @@ const Desk = () => {
     const query = debouncedNoteSearch.toLowerCase();
     return !query || ((note.title || "").toLowerCase().includes(query) || (note.summary || "").toLowerCase().includes(query));
   });
+
+  useEffect(() => {
+    const totalBookPages = Math.max(1, Math.ceil(filteredBooks.length / booksPerPage));
+    setBookPage((currentPage) => Math.min(Math.max(1, currentPage), totalBookPages));
+  }, [filteredBooks.length, booksPerPage]);
+
+  useEffect(() => {
+    const totalNotePages = Math.max(1, Math.ceil(filteredNotes.length / notesPerPage));
+    setNotePage((currentPage) => Math.min(Math.max(1, currentPage), totalNotePages));
+  }, [filteredNotes.length, notesPerPage]);
 
   const handleDraftPairChange = (index, field, value) => {
     setDraftNote((prev) => {
@@ -221,7 +234,7 @@ const Desk = () => {
   if (status === "loading") return <p>Loading...</p>;
 
   return (
-    <div className="flex h-full">
+    <div className="flex min-h-screen flex-col gap-4 overflow-hidden p-3 lg:h-screen lg:flex-row lg:p-0">
       <SidePanel
         label={selectedBookId ? shelf.find((book) => String(book.id) === String(selectedBookId))?.title : "No Book Selected"}
         searchValue={bookSearch}
@@ -233,7 +246,9 @@ const Desk = () => {
         totalPages={Math.max(1, Math.ceil(filteredBooks.length / booksPerPage))}
         onPageChange={(p) => setBookPage(p)}
       >
-        <div className="h-40 w-full rounded-b-lg bg-purple-500 text-purple-50"></div>
+        <div className="mb-2 rounded-xl border border-violet-200 bg-violet-50/80 p-3">
+          <Account user={user} />
+        </div>
         {(shelf && shelf.length > 0) ? (() => {
           const start = (bookPage - 1) * booksPerPage;
           if (filteredBooks.length === 0) {
@@ -250,31 +265,32 @@ const Desk = () => {
         })() : <p className="px-4 py-3 text-sm text-stone-500">No books yet. Add one to get started.</p>}
 
         <AddBook userId={userid} onBookAdded={handleBookAdded} />
-        <div className="mt-auto"><Account user={user} /></div>
       </SidePanel>
 
-      <div className="space-y-4 px-6">
-        <NotebookSummary sessionId={sessionId} sessionName={`session ${session_num}`} />
-        <div className="flex items-start justify-around">
-          <CornellNoteTaking
-            sessionId={sessionId}
-            session={session_num}
-            pomodoro={pomodoro_num}
-            bookId={selectedBookId}
-            onNoteSaved={() => refreshNotes(selectedBookId)}
-            onError={setModalError}
-          />
-          <Pomodoro
-            userId={userid}
-            bookId={selectedBookId}
-            sessionId={sessionId}
-            setSessionId={setSessionId}
-            pomodoro={pomodoro_num}
-            setPomodoro={setPomodoro_num}
-            session={session_num}
-            setSessions={setSessions_num}
-            todos={todos}
-          />
+      <div className="order-2 flex min-h-0 flex-1 flex-col gap-4 px-0 lg:order-none lg:px-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
+          <NotebookSummary sessionId={sessionId} sessionName={`session ${session_num}`} />
+          <div className="flex flex-col items-stretch gap-4 xl:flex-row xl:items-start xl:justify-around">
+            <CornellNoteTaking
+              sessionId={sessionId}
+              session={session_num}
+              pomodoro={pomodoro_num}
+              bookId={selectedBookId}
+              onNoteSaved={() => refreshNotes(selectedBookId)}
+              onError={setModalError}
+            />
+            <Pomodoro
+              userId={userid}
+              bookId={selectedBookId}
+              sessionId={sessionId}
+              setSessionId={setSessionId}
+              pomodoro={pomodoro_num}
+              setPomodoro={setPomodoro_num}
+              session={session_num}
+              setSessions={setSessions_num}
+              todos={todos}
+            />
+          </div>
         </div>
       </div>
 

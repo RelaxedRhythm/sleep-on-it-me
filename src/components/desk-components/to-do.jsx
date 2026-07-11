@@ -65,15 +65,15 @@ export default function ToDo({ todos = [] }) {
   };
 
   return (
-    <div className="mt-4 h-95">
-      <ul className="h-11/13 overflow-y-scroll rounded-xl bg-lime-50 py-4">
+    <div className="mt-4 flex min-h-0 flex-col">
+      <ul className="max-h-64 overflow-y-auto rounded-xl bg-lime-50 py-4 lg:max-h-72">
         {tasks.length === 0 ? (
           <li className="px-4 py-2 text-gray-500">No tasks yet.</li>
         ) : (
           tasks.map((task) => (
             <li
               key={task.id}
-              className="group flex max-w-72 items-center gap-2 rounded-sm px-2 py-1 text-stone-700 hover:bg-amber-200"
+              className="group flex items-center gap-2 rounded-sm px-2 py-1 text-stone-700 hover:bg-amber-200"
             >
               <input
                 type="checkbox"

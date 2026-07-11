@@ -46,6 +46,38 @@ function parseModelResponse(content) {
   return JSON.parse(cleaned);
 }
 
+function buildFallbackSummary(notes) {
+  const cleanedNotes = Array.isArray(notes) ? notes : [];
+  const titles = cleanedNotes
+    .map((note) => (note?.title || "").trim())
+    .filter(Boolean)
+    .slice(0, 3);
+
+  const shortSummary =
+    titles.length > 0
+      ? `Reviewed ${titles.length} note${titles.length === 1 ? "" : "s"}: ${titles.join(", ")}.`
+      : "Reviewed the available session notes.";
+
+  const keyTakeaways = titles.length > 0
+    ? titles.map((title) => `Focused on ${title}`)
+    : ["Captured the main ideas from this study session."];
+
+  const actionItems = titles.length > 0
+    ? ["Follow up on the main ideas from these notes."]
+    : ["Add a few more notes to build a stronger review summary."];
+
+  const topicsToRevise = cleanedNotes
+    .filter((note) => !(note?.summary || "").trim())
+    .map((note, index) => note?.title || `Note ${index + 1}`);
+
+  return {
+    shortSummary,
+    keyTakeaways,
+    actionItems,
+    topicsToRevise: topicsToRevise.length > 0 ? topicsToRevise : ["Review any unclear points from the session."],
+  };
+}
+
 export async function POST(request) {
   try {
     const session = await auth();
@@ -79,58 +111,65 @@ export async function POST(request) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY || process.env.GEMINI_API_KEY;
+    const model = process.env.GROK_MODEL || "grok-2-latest";
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "AI service is not configured" },
-        { status: 500 },
-      );
+      return NextResponse.json(buildFallbackSummary(notesResult.rows));
     }
 
-    const completion = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
+    let completion;
+    try {
+      completion = await fetch("https://api.x.ai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents: [
+          model,
+          temperature: 0.3,
+          max_tokens: 800,
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert study coach.",
+            },
             {
               role: "user",
-              parts: [{ text: buildPrompt(notesResult.rows) }],
+              content: buildPrompt(notesResult.rows),
             },
           ],
-          generationConfig: {
-            temperature: 0.3,
-            responseMimeType: "application/json",
-          },
         }),
-      },
-    );
+      });
+    } catch (error) {
+      console.error("Grok request failed:", error);
+      return NextResponse.json(buildFallbackSummary(notesResult.rows));
+    }
 
     if (!completion.ok) {
       const errorText = await completion.text();
-      console.error("Gemini request failed:", errorText);
-      return NextResponse.json(
-        { error: "AI summary request failed" },
-        { status: 502 },
-      );
+      console.error("Grok request failed:", errorText);
+      return NextResponse.json(buildFallbackSummary(notesResult.rows));
     }
 
-    const data = await completion.json();
-    const content =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    const result = parseModelResponse(content);
+    try {
+      const data = await completion.json();
+      const content =
+        data?.choices?.[0]?.message?.content || "{}";
+      const result = parseModelResponse(content);
 
-    return NextResponse.json({
-      shortSummary: result.shortSummary || "",
-      keyTakeaways: Array.isArray(result.keyTakeaways) ? result.keyTakeaways : [],
-      actionItems: Array.isArray(result.actionItems) ? result.actionItems : [],
-      topicsToRevise: Array.isArray(result.topicsToRevise)
-        ? result.topicsToRevise
-        : [],
-    });
+      return NextResponse.json({
+        shortSummary: result.shortSummary || "",
+        keyTakeaways: Array.isArray(result.keyTakeaways) ? result.keyTakeaways : [],
+        actionItems: Array.isArray(result.actionItems) ? result.actionItems : [],
+        topicsToRevise: Array.isArray(result.topicsToRevise)
+          ? result.topicsToRevise
+          : [],
+      });
+    } catch (error) {
+      console.error("Grok response parsing failed:", error);
+      return NextResponse.json(buildFallbackSummary(notesResult.rows));
+    }
   } catch (error) {
     console.error("AI summary route error:", error);
     return NextResponse.json(

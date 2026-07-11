@@ -193,7 +193,7 @@ export default function Pomodoro({bookId,userId,sessionId,setSessionId,pomodoro,
   };
 
   return (
-    <div className="min-w-80 rounded-xl bg-lime-100 p-4">
+    <div className="w-full rounded-xl bg-lime-100 p-4 lg:min-w-80 lg:max-w-96">
       <TimerDisplay
         timeLeft={timeLeft}
         mode={mode}
