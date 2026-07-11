@@ -56,6 +56,28 @@ const Desk = () => {
     }
   }, [status]);
 
+  const refreshBooks = async () => {
+  try {
+    const response = await fetch("/api/desk");
+    const data = await response.json();
+
+    setShelf(data.books || []);
+
+    // if deleted selected book, clear selection
+    if (
+      selectedBookId &&
+      !(data.books || []).some((book) => String(book.id) === String(selectedBookId))
+    ) {
+      setSelectedBookId(null);
+      setNotes([]);
+    }
+
+  } catch (error) {
+    console.error("Error refreshing books:", error);
+    setModalError("Could not refresh books.");
+  }
+};
+
   const refreshNotes = async (bookId = selectedBookId) => {
     if (!bookId) {
       setNotes([]);
@@ -85,9 +107,9 @@ const Desk = () => {
     setNotePage(1);
   };
 
-  const handleBookAdded = (newBook) => {
+  const handleBookAdded = async (newBook) => {
     if (!newBook?.id) return;
-    setShelf((prevShelf) => [newBook, ...prevShelf]);
+    await refreshBooks();
     setSelectedNote(null);
     setIsEditingNote(false);
     setNotes([]);
@@ -260,6 +282,7 @@ const Desk = () => {
               data={book}
               isSelected={String(book.id) === String(selectedBookId)}
               onSelect={handleSelectBook}
+              onBookChange={refreshBooks}
             />
           ));
         })() : <p className="px-4 py-3 text-sm text-stone-500">No books yet. Add one to get started.</p>}

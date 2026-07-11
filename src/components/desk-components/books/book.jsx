@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { NotebookText,Pencil,Trash2 } from "lucide-react"; 
+import { NotebookText, Pencil, Trash2 } from "lucide-react";
 import { deleteBooks, updateBooks } from "../../../library/actions";
-const Book = ({ data, isSelected, onSelect }) => {
+const Book = ({ data, isSelected, onSelect, onBookChange }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(data.title);
-  const [books, setBooks] = useState([]);
   const handleEdit = (e) => {
     e.stopPropagation();
     setIsEditing(!isEditing);
@@ -15,16 +14,17 @@ const Book = ({ data, isSelected, onSelect }) => {
   const handleSave = async (e) => {
     if (e.key === "Enter" || e.type === "blur") {
       await updateBooks(data.id, title);
+      if (onBookChange) await onBookChange();
       setIsEditing(false);
     }
   };
 
-
-
-   const handleDelete = async (e,id) => {
+  const handleDelete = async (e, id) => {
     e.stopPropagation();
     await deleteBooks(id);
-
+    if (onBookChange) {
+      await onBookChange();
+    }
   };
 
   return (
@@ -39,7 +39,7 @@ const Book = ({ data, isSelected, onSelect }) => {
         name="bookName"
         className={`outline-none ${
           isEditing ? "border px-1" : "border-none"
-         } bg-transparent text-inherit w-full`}
+        } w-full bg-transparent text-inherit`}
         readOnly={!isEditing}
         onChange={(e) => setTitle(e.target.value)}
         onBlur={handleSave}
