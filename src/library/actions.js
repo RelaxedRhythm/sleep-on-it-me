@@ -87,8 +87,8 @@ async function fetchTodo() {
 }
 
 async function fetchBooks(userId) {
-  const books = await client.query("SELECT * FROM books WHERE user_id = $1", [
-    userId,
+  const books = await client.query("SELECT * FROM books WHERE user_id = $1 ORDER BY created_at DESC", [
+    userId ,
   ]);
   return books.rows;
 }
