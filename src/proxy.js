@@ -26,7 +26,7 @@ export default auth((req)=> {
   }
 
   if (isLoggedIn && authFile) {
-    return NextResponse.redirect(new URL("/home", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
   if (!isLoggedIn && !authFile) {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -40,6 +40,6 @@ export default auth((req)=> {
 })
 
 export const config = {
-  matcher: ["/", "/home", "/signup", "/login", "/desk","/profile","/api"],
+  matcher: ["/dashboard", "/signup", "/login", "/desk","/profile","/api"],
   // matcher:[]
 };
