@@ -20,6 +20,7 @@ export async function GET() {
       notes = await fetchNotes(selectedBookId);
     }
 
+    console.log(todos,books,notes,selectedBookId);
     return NextResponse.json({ todos, books, notes,selectedBookId });
   } catch (error) {
     console.error("Desk API error:", error);

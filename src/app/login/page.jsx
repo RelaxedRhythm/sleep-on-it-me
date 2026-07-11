@@ -21,11 +21,12 @@ export default function Login() {
     const res = await signIn("credentials", {
       identifier,
       password,
-      redirect: true,
+      redirect: false,
     });
 
     if (!res?.error) {
       router.push("/dashboard");
+      router.refresh();
       return;
     }
 
