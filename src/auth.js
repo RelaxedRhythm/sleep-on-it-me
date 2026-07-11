@@ -95,9 +95,9 @@ export const {handlers,auth,signIn,signOut} = NextAuth({
   jwt: {
     maxAge: 3 * 60,
   },
-  page:{
+  pages:{
     signIn:"/login",
-    signOut:"/login",
+    // signOut:"/login",
   },
 
   trustHost: true, 
