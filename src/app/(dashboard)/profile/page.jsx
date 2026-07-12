@@ -1,5 +1,5 @@
 "use client";
-import "../globals.css";
+import "../../globals.css";
 
 import {useSession} from "next-auth/react";
 import { useEffect, useState } from "react";
