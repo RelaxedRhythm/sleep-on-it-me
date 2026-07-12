@@ -1,264 +1,285 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Sleep on it! | Login",
+  title: "Sleep on it! | Study Smarter",
   description: "The best productive learning app on the market",
 };
 
 import Link from "next/link";
 import {
-  Brain,
   BookOpen,
   Timer,
+  Brain,
   Moon,
-  CheckCircle,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <main className="min-h-screen bg-[#f8f7f2] text-gray-800">
+
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="text-2xl font-bold text-indigo-600">
-            Sleep-On-It
-          </Link>
+      <nav className="flex items-center justify-between px-10 py-6">
+        <h1 className="text-3xl font-bold text-blue-600">
+          Sleep-On-It
+        </h1>
 
-          <div className="hidden gap-8 md:flex">
-            <a href="#features">Features</a>
-            <a href="#how">How It Works</a>
-            <a href="#about">About</a>
-          </div>
+        <div className="flex gap-8 font-medium text-gray-600">
+          <Link href="#features">Features</Link>
+          <Link href="#workflow">Workflow</Link>
+          <Link href="/login">Login</Link>
+        </div>
 
-          <div className="flex gap-3">
-            <Link
-              href="/login"
-              className="rounded-lg border px-5 py-2 hover:bg-gray-100"
-            >
-              Login
-            </Link>
+        <Link
+          href="/signup"
+          className="rounded-xl bg-orange-500 px-6 py-3 text-white"
+        >
+          Get Started
+        </Link>
+      </nav>
+
+
+      {/* Hero */}
+      <section className="grid grid-cols-1 gap-10 px-10 py-16 md:grid-cols-2">
+
+        <div className="flex flex-col justify-center">
+
+          <p className="mb-4 flex items-center gap-2 text-blue-600">
+            <Sparkles size={18}/>
+            Smart Learning Workspace
+          </p>
+
+          <h1 className="text-6xl font-bold leading-tight">
+            Study.
+            <span className="text-blue-600">
+              Focus.
+            </span>
+            <br/>
+            Remember.
+          </h1>
+
+
+          <p className="mt-6 max-w-lg text-lg text-gray-600">
+            Combine Cornell Notes, Pomodoro sessions and AI summaries
+            to create a smarter learning routine.
+          </p>
+
+
+          <div className="mt-8 flex gap-5">
 
             <Link
               href="/signup"
-              className="rounded-lg bg-indigo-600 px-5 py-2 text-white hover:bg-indigo-700"
+              className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-4 text-white"
             >
-              Get Started
+              Start Learning
+              <ArrowRight size={18}/>
             </Link>
-          </div>
-        </div>
-      </nav>
 
-      {/* Hero */}
-      <section className="mx-auto flex max-w-7xl flex-col items-center px-6 py-24 text-center">
-        <span className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-600">
-          Productivity • Cornell Notes • Pomodoro
-        </span>
 
-        <h1 className="mt-8 max-w-4xl text-5xl font-extrabold leading-tight md:text-7xl">
-          Study Smarter.
-          <span className="text-indigo-600"> Focus Better.</span>
-          <br />
-          Sleep On It.
-        </h1>
-
-        <p className="mt-8 max-w-2xl text-lg text-gray-600">
-          Organize your notes using the Cornell Method, stay focused with the
-          Pomodoro Timer, and revisit your work after quality sleep for better
-          retention.
-        </p>
-
-        <div className="mt-10 flex flex-wrap justify-center gap-5">
-          <Link
-            href="/signup"
-            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-4 text-white hover:bg-indigo-700"
-          >
-            Start Studying
-            <ArrowRight size={18} />
-          </Link>
-
-          <Link
-            href="/demo"
-            className="rounded-lg border px-8 py-4 hover:bg-gray-100"
-          >
-            Live Demo
-          </Link>
-        </div>
-
-        {/* Stats */}
-
-        <div className="mt-20 grid w-full max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
-          {[
-            ["Pomodoro", "25 Min"],
-            ["Cornell", "Smart Notes"],
-            ["Books", "Unlimited"],
-            ["Progress", "Tracked"],
-          ].map(([title, value]) => (
-            <div
-              key={title}
-              className="rounded-xl border bg-white p-6 shadow-sm"
+            <Link
+              href="/demo"
+              className="rounded-xl border px-8 py-4"
             >
-              <h2 className="text-3xl font-bold text-indigo-600">{value}</h2>
-              <p className="mt-2 text-gray-500">{title}</p>
-            </div>
-          ))}
+              Demo
+            </Link>
+
+          </div>
+
         </div>
+
+
+
+        {/* Workspace Preview */}
+        <div className="rounded-3xl bg-white p-6 shadow-xl">
+
+          <div className="mb-5 flex justify-between">
+            <h2 className="font-bold">
+              Study Workspace
+            </h2>
+
+            <span className="rounded-lg bg-blue-100 px-3 py-1 text-blue-600">
+              Today
+            </span>
+          </div>
+
+
+          {/* AI Summary */}
+          <div className="rounded-2xl bg-[#f1f7ff] p-6">
+
+            <div className="flex items-center gap-3">
+              <Brain className="text-blue-600"/>
+              <h3 className="text-xl font-bold">
+                AI Note Summary
+              </h3>
+            </div>
+
+
+            <p className="mt-3 text-gray-600">
+              Review your notes, extract key points,
+              and prepare for revision.
+            </p>
+
+          </div>
+
+
+
+          {/* Pomodoro */}
+          <div className="mt-5 rounded-2xl bg-orange-50 p-6">
+
+            <div className="flex items-center gap-3">
+              <Timer className="text-orange-500"/>
+              <h3 className="font-bold">
+                Pomodoro Session
+              </h3>
+            </div>
+
+
+            <div className="mt-5 text-center">
+
+              <p className="text-6xl font-bold text-orange-500">
+                25:00
+              </p>
+
+              <button className="mt-5 rounded-xl bg-orange-500 px-10 py-3 text-white">
+                Start
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </section>
+
+
 
       {/* Features */}
+      <section
+        id="features"
+        className="px-10 py-20"
+      >
 
-      <section id="features" className="bg-gray-50 py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <h2 className="text-center text-4xl font-bold">
-            Everything You Need To Stay Productive
-          </h2>
+        <h2 className="text-center text-4xl font-bold">
+          Your Complete Study Desk
+        </h2>
 
-          <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <FeatureCard
-              icon={<BookOpen size={35} />}
-              title="Cornell Notes"
-              desc="Capture notes efficiently with cue, notes, and summary sections."
-            />
 
-            <FeatureCard
-              icon={<Timer size={35} />}
-              title="Pomodoro Timer"
-              desc="Stay focused with structured study sessions and short breaks."
-            />
+        <div className="mt-12 grid gap-8 md:grid-cols-4">
 
-            <FeatureCard
-              icon={<Brain size={35} />}
-              title="Smart Revision"
-              desc="Revisit your notes after sleep to improve memory retention."
-            />
 
-            <FeatureCard
-              icon={<Moon size={35} />}
-              title="Sleep Tracking"
-              desc="Record study sessions and reflect after a night's sleep."
-            />
-          </div>
+          <Feature
+            icon={<BookOpen/>}
+            title="Cornell Notes"
+            text="Create structured notes and organize concepts."
+          />
+
+
+          <Feature
+            icon={<Timer/>}
+            title="Pomodoro"
+            text="Focus with productive study sessions."
+          />
+
+
+          <Feature
+            icon={<Brain/>}
+            title="AI Summary"
+            text="Generate quick revision material."
+          />
+
+
+          <Feature
+            icon={<Moon/>}
+            title="Sleep Review"
+            text="Revisit knowledge after rest."
+          />
+
+
         </div>
+
       </section>
 
-      {/* How It Works */}
 
-      <section id="how" className="mx-auto max-w-7xl px-6 py-24">
+
+      {/* Workflow */}
+      <section
+        id="workflow"
+        className="bg-blue-600 px-10 py-20 text-white"
+      >
+
         <h2 className="text-center text-4xl font-bold">
           How Sleep-On-It Works
         </h2>
 
-        <div className="mt-16 grid gap-10 md:grid-cols-3">
-          <Step
-            number="1"
-            title="Create Notes"
-            desc="Organize your ideas using Cornell note-taking."
-          />
 
-          <Step
-            number="2"
-            title="Study With Pomodoro"
-            desc="Complete focused study cycles while tracking progress."
-          />
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
 
-          <Step
-            number="3"
-            title="Review Tomorrow"
-            desc="Revisit your notes after sleep for stronger long-term memory."
-          />
-        </div>
-      </section>
 
-      {/* Benefits */}
-
-      <section id="about" className="bg-indigo-600 py-24 text-white">
-        <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-center text-4xl font-bold">
-            Why Students Love Sleep-On-It
-          </h2>
-
-          <div className="mt-16 grid gap-6 md:grid-cols-2">
-            {[
-              "Reduce procrastination",
-              "Improve memory retention",
-              "Structured Cornell Notes",
+          {
+            [
+              "Write your notes",
               "Focus using Pomodoro",
-              "Track study progress",
-              "Clean and distraction-free interface",
-            ].map((item) => (
+              "Review after sleep"
+            ].map((item,index)=>(
               <div
                 key={item}
-                className="flex items-center gap-4 rounded-xl bg-white/10 p-5"
+                className="rounded-2xl bg-white/10 p-8 text-center"
               >
-                <CheckCircle />
-                <p>{item}</p>
+
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-blue-600">
+                  {index+1}
+                </div>
+
+                <h3 className="mt-5 text-xl font-bold">
+                  {item}
+                </h3>
+
               </div>
-            ))}
-          </div>
+            ))
+          }
+
+
         </div>
+
       </section>
 
-      {/* CTA */}
 
-      <section className="py-24">
-        <div className="mx-auto max-w-4xl rounded-3xl bg-indigo-600 px-10 py-16 text-center text-white">
-          <h2 className="text-4xl font-bold">
-            Ready To Transform Your Study Sessions?
-          </h2>
-
-          <p className="mt-5 text-lg text-indigo-100">
-            Join students who combine effective note-taking, focused study, and
-            smarter revision.
-          </p>
-
-          <Link
-            href="/signup"
-            className="mt-8 inline-block rounded-lg bg-white px-8 py-4 font-semibold text-indigo-600"
-          >
-            Get Started Free
-          </Link>
-        </div>
-      </section>
 
       {/* Footer */}
-
-      <footer className="border-t py-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between px-6 text-gray-500 md:flex-row">
-          <p>© 2026 Sleep-On-It</p>
-
-          <div className="flex gap-6">
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Contact</a>
-          </div>
-        </div>
+      <footer className="py-8 text-center text-gray-500">
+        © 2026 Sleep-On-It
       </footer>
+
+
     </main>
   );
 }
 
-function FeatureCard({ icon, title, desc }) {
+
+
+function Feature({icon,title,text}){
+
   return (
-    <div className="rounded-2xl bg-white p-8 shadow transition hover:-translate-y-2 hover:shadow-lg">
-      <div className="mb-6 text-indigo-600">{icon}</div>
 
-      <h3 className="text-xl font-bold">{title}</h3>
+    <div className="rounded-3xl bg-white p-8 shadow-sm transition hover:-translate-y-2">
 
-      <p className="mt-3 text-gray-600">{desc}</p>
-    </div>
-  );
-}
-
-function Step(number,title,desc) {
-  return (
-    <div className="rounded-xl border p-8 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-600 text-2xl font-bold text-white">
-        {number}
+      <div className="mb-5 text-blue-600">
+        {icon}
       </div>
 
-      <h3 className="mt-6 text-2xl font-semibold">{title}</h3>
 
-      <p className="mt-3 text-gray-600">{desc}</p>
+      <h3 className="text-xl font-bold">
+        {title}
+      </h3>
+
+
+      <p className="mt-3 text-gray-600">
+        {text}
+      </p>
+
     </div>
+
   );
 }
