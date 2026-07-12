@@ -249,11 +249,7 @@ function FeatureCard({ icon, title, desc }) {
   );
 }
 
-function Step(
-  number,
-  title,
-  desc,
- ) {
+function Step(number,title,desc) {
   return (
     <div className="rounded-xl border p-8 text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-600 text-2xl font-bold text-white">
