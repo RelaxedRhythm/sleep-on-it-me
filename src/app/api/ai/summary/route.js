@@ -68,13 +68,13 @@ function buildPrompt(notes) {
     .join("\n\n");
 
   return [
-    "You are a study-session summarizer.",
-    "Analyze the student's notes and create a useful revision summary based ONLY on the information provided. Do not simply repeat or rephrase note titles. Identify what was actually learned, important concepts, topics that may need revision, and reasonable next steps. Do not invent information.",
+    "You are a study-session recommender.",
+    "Based on the student's notes, suggest the most useful next steps for revision or practice. Use only what is actually present in the notes. Do not simply restate the note titles. Focus on what the student should do next to strengthen understanding, clarify gaps, and review the most important concepts.",
     "",
     "Return valid JSON in this exact shape:",
     "{",
-    '  "shortSummary": "A concise paragraph summarizing what was actually studied.",',
-    '  "keyTakeaways": ["Important concept or learning point"],',
+    '  "shortSummary": "A brief sentence explaining the best next step suggested by the notes.",',
+    '  "keyTakeaways": ["The most important concept or focus area"],',
     '  "actionItems": ["Concrete next step supported by the notes"],',
     '  "topicsToRevise": ["Specific concept that should be revised"]',
     "}",
@@ -84,12 +84,11 @@ function buildPrompt(notes) {
     noteText || "No notes were provided.",
     "",
     "Rules:",
-    "- Base the output on the actual note content, not the note title alone.",
-    "- Include what the student studied, the important concepts, the revision topics, and any reasonable next steps only if they follow from the notes.",
-    "- If the notes do not contain enough meaningful information, set shortSummary to a clear sentence saying not enough information was recorded for a detailed summary and keep the lists empty or explicitly note the lack of detail.",
-    "- Keep the short summary concise and factual.",
-    "- Keep each list item brief and specific.",
-    "- Do not invent concepts, facts, or learning outcomes.",
+    "- Base your recommendations on the actual content of the notes, not on the note titles alone.",
+    "- The output should feel like a plan for what to do next after this study session.",
+    "- Prefer concrete actions like reviewing specific concepts, practicing examples, testing recall, or clarifying weak areas supported by the notes.",
+    "- If the notes do not contain enough meaningful information, say so honestly in shortSummary and keep the lists empty or limited to explicit review suggestions.",
+    "- Do not invent facts, learning outcomes, or topics that are not in the notes.",
   ].join("\n");
 }
 
@@ -126,7 +125,7 @@ function buildFallbackSummary(notes) {
 
   if (!meaningfulNotes.length) {
     return {
-      shortSummary: "Not enough information was recorded in this session to generate a detailed summary.",
+      shortSummary: "Not enough information was recorded in this session to suggest a useful next step.",
       keyTakeaways: [],
       actionItems: [],
       topicsToRevise: [],
@@ -140,17 +139,78 @@ function buildFallbackSummary(notes) {
 
   return {
     shortSummary: summaryText
-      ? `Reviewed the session notes, focusing on ${summaryText}.`
-      : "Not enough information was recorded in this session to generate a detailed summary.",
+      ? `The most useful next step is to review and practice the ideas in ${summaryText}.`
+      : "Not enough information was recorded in this session to suggest a useful next step.",
     keyTakeaways: meaningfulNotes
       .slice(0, 3)
       .map((noteText) => (noteText.length > 160 ? `${noteText.slice(0, 160)}...` : noteText)),
     actionItems: meaningfulNotes.length
-      ? ["Review the main concepts captured in these notes and fill in any missing details."]
+      ? ["Review the main concepts from these notes and test yourself on them."]
       : [],
     topicsToRevise: meaningfulNotes.length
-      ? ["Revisit the key concepts from the session notes and clarify any uncertain points."]
+      ? ["Revisit the key ideas and clarify anything you are unsure about."]
       : [],
+  };
+}
+
+async function getNotesForSummary(sessionId, userId) {
+  const notesResult = await client.query(
+    `SELECT n.id, n.title, n.summary, n.session_num, n.pomodoro_num, n.created_at,
+            COALESCE(
+              json_agg(
+                json_build_object('cue', nd.cue, 'content', nd.content)
+                ORDER BY nd.id
+              ) FILTER (WHERE nd.id IS NOT NULL),
+              '[]'::json
+            ) AS key_value_pairs
+     FROM notes n
+     LEFT JOIN note_details nd ON nd.note_id = n.id
+     WHERE n.session_id = $1
+     GROUP BY n.id
+     ORDER BY n.created_at ASC`,
+    [sessionId],
+  );
+
+  if (notesResult.rowCount) {
+    return { notes: notesResult.rows, sourceSessionId: sessionId, source: "current" };
+  }
+
+  const lastSessionResult = await client.query(
+    `SELECT s.id, s.user_id, s.session_num, s.started_at
+     FROM sessions s
+     WHERE s.user_id = $1
+       AND s.id != $2
+     ORDER BY s.started_at DESC, s.id DESC
+     LIMIT 1`,
+    [userId, sessionId],
+  );
+
+  if (!lastSessionResult.rowCount) {
+    return { notes: [], sourceSessionId: null, source: "none" };
+  }
+
+  const lastSessionId = lastSessionResult.rows[0].id;
+  const lastSessionNotesResult = await client.query(
+    `SELECT n.id, n.title, n.summary, n.session_num, n.pomodoro_num, n.created_at,
+            COALESCE(
+              json_agg(
+                json_build_object('cue', nd.cue, 'content', nd.content)
+                ORDER BY nd.id
+              ) FILTER (WHERE nd.id IS NOT NULL),
+              '[]'::json
+            ) AS key_value_pairs
+     FROM notes n
+     LEFT JOIN note_details nd ON nd.note_id = n.id
+     WHERE n.session_id = $1
+     GROUP BY n.id
+     ORDER BY n.created_at ASC`,
+    [lastSessionId],
+  );
+
+  return {
+    notes: lastSessionNotesResult.rows || [],
+    sourceSessionId: lastSessionId,
+    source: "last",
   };
 }
 
@@ -172,26 +232,11 @@ export async function POST(request) {
     }
 
     const sessionId = parsed.data.sessionId.toString();
-    const notesResult = await client.query(
-      `SELECT n.id, n.title, n.summary, n.session_num, n.pomodoro_num, n.created_at,
-              COALESCE(
-                json_agg(
-                  json_build_object('cue', nd.cue, 'content', nd.content)
-                  ORDER BY nd.id
-                ) FILTER (WHERE nd.id IS NOT NULL),
-                '[]'::json
-              ) AS key_value_pairs
-       FROM notes n
-       LEFT JOIN note_details nd ON nd.note_id = n.id
-       WHERE n.session_id = $1
-       GROUP BY n.id
-       ORDER BY n.created_at ASC`,
-      [sessionId],
-    );
+    const targetNotes = await getNotesForSummary(sessionId, session.user.id);
 
-    if (!notesResult.rowCount) {
+    if (!targetNotes.notes.length) {
       return NextResponse.json(
-        { message: "No notes found for this session yet." },
+        { message: "No notes found for this session yet, so we used the most recent available session instead." },
         { status: 200 },
       );
     }
@@ -201,7 +246,7 @@ export async function POST(request) {
     const model = usesGemini ? "gemini-2.0-flash" : process.env.GROK_MODEL || "grok-2-latest";
 
     if (!geminiApiKey) {
-      return NextResponse.json(buildFallbackSummary(notesResult.rows));
+      return NextResponse.json(buildFallbackSummary(targetNotes.notes));
     }
 
     let completion;
@@ -224,7 +269,7 @@ export async function POST(request) {
               contents: [
                 {
                   role: "user",
-                  parts: [{ text: buildPrompt(notesResult.rows) }],
+                  parts: [{ text: buildPrompt(targetNotes.notes) }],
                 },
               ],
               generationConfig: {
@@ -272,7 +317,7 @@ export async function POST(request) {
               },
               {
                 role: "user",
-                content: buildPrompt(notesResult.rows),
+                content: buildPrompt(targetNotes.notes),
               },
             ],
           }),
@@ -280,13 +325,13 @@ export async function POST(request) {
       }
     } catch (error) {
       console.error("AI summary request failed:", error);
-      return NextResponse.json(buildFallbackSummary(notesResult.rows));
+      return NextResponse.json(buildFallbackSummary(targetNotes.notes));
     }
 
     if (!completion.ok) {
       const errorText = await completion.text();
       console.error("AI summary request failed:", errorText);
-      return NextResponse.json(buildFallbackSummary(notesResult.rows));
+      return NextResponse.json(buildFallbackSummary(targetNotes.notes));
     }
 
     try {
@@ -307,7 +352,7 @@ export async function POST(request) {
       });
     } catch (error) {
       console.error("AI summary response parsing failed:", error);
-      return NextResponse.json(buildFallbackSummary(notesResult.rows));
+      return NextResponse.json(buildFallbackSummary(targetNotes.notes));
     }
   } catch (error) {
     console.error("AI summary route error:", error);
