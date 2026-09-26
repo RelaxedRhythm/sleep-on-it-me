@@ -68,15 +68,12 @@ function buildPrompt(notes) {
     .join("\n\n");
 
   return [
-    "You are a study-session recommender.",
-    "Based on the student's notes, suggest the most useful next steps for revision or practice. Use only what is actually present in the notes. Do not simply restate the note titles. Focus on what the student should do next to strengthen understanding, clarify gaps, and review the most important concepts.",
+    "You are a study assistant.",
+    "Based on the student's study notes, suggest useful and specific next steps. Identify concepts worth practising, topics to explore further, relevant exercises, and areas that may need revision. Make suggestions directly relevant to the provided notes. Do not merely summarize or rephrase the notes. Do not invent information or assume the student has mastered a concept. If the notes contain insufficient information, acknowledge this and provide only suggestions that are reasonably supported by the available information.",
     "",
     "Return valid JSON in this exact shape:",
     "{",
-    '  "shortSummary": "A brief sentence explaining the best next step suggested by the notes.",',
-    '  "keyTakeaways": ["The most important concept or focus area"],',
-    '  "actionItems": ["Concrete next step supported by the notes"],',
-    '  "topicsToRevise": ["Specific concept that should be revised"]',
+    '  "suggestions": [{"title": "Short action title", "description": "Clear, specific suggestion based on the notes."}]',
     "}",
     "",
     "SESSION NOTES:",
@@ -84,11 +81,12 @@ function buildPrompt(notes) {
     noteText || "No notes were provided.",
     "",
     "Rules:",
-    "- Base your recommendations on the actual content of the notes, not on the note titles alone.",
-    "- The output should feel like a plan for what to do next after this study session.",
-    "- Prefer concrete actions like reviewing specific concepts, practicing examples, testing recall, or clarifying weak areas supported by the notes.",
-    "- If the notes do not contain enough meaningful information, say so honestly in shortSummary and keep the lists empty or limited to explicit review suggestions.",
-    "- Do not invent facts, learning outcomes, or topics that are not in the notes.",
+    "- Base the recommendations on the actual content of the notes, not on the note titles alone.",
+    "- Suggest concrete next steps such as practising a concept, building an example, testing recall, revising a weak concept, or applying a topic in a small exercise.",
+    "- Keep each suggestion brief, specific, and actionable.",
+    "- Limit the response to 3 to 5 suggestions.",
+    "- If there is not enough meaningful information, return an empty suggestions array and set the description text to say the notes are too limited to suggest a confident next step.",
+    "- Do not invent facts, learning outcomes, topics, or confidence levels.",
   ].join("\n");
 }
 
@@ -99,57 +97,44 @@ function parseModelResponse(content) {
     .trim();
 
   const parsed = JSON.parse(cleaned || "{}");
+  const suggestions = Array.isArray(parsed?.suggestions) ? parsed.suggestions : [];
 
   return {
-    shortSummary:
-      normalizeText(parsed?.shortSummary) ||
-      "Not enough information was recorded in this session to generate a detailed summary.",
-    keyTakeaways: Array.isArray(parsed?.keyTakeaways)
-      ? parsed.keyTakeaways.map((item) => normalizeText(item)).filter(Boolean)
-      : [],
-    actionItems: Array.isArray(parsed?.actionItems)
-      ? parsed.actionItems.map((item) => normalizeText(item)).filter(Boolean)
-      : [],
-    topicsToRevise: Array.isArray(parsed?.topicsToRevise)
-      ? parsed.topicsToRevise.map((item) => normalizeText(item)).filter(Boolean)
-      : [],
+    suggestions: suggestions
+      .map((item) => ({
+        title: normalizeText(item?.title),
+        description: normalizeText(item?.description),
+      }))
+      .filter((item) => item.title && item.description)
+      .slice(0, 5),
   };
 }
 
-function buildFallbackSummary(notes) {
+function buildFallbackSummary(notes, basedOn = "current") {
   const cleanedNotes = Array.isArray(notes) ? notes : [];
   const meaningfulNotes = cleanedNotes
     .map((note) => getMeaningfulNoteText(note))
     .map((text) => normalizeText(text))
     .filter(Boolean);
 
-  if (!meaningfulNotes.length) {
-    return {
-      shortSummary: "Not enough information was recorded in this session to suggest a useful next step.",
-      keyTakeaways: [],
-      actionItems: [],
-      topicsToRevise: [],
-    };
-  }
-
-  const summaryText = meaningfulNotes
-    .slice(0, 3)
-    .join(". ")
-    .slice(0, 300);
+  const fallbackSuggestions = [
+    {
+      title: "Review the main ideas",
+      description: meaningfulNotes.length
+        ? `Revisit the core ideas in the notes and check the most important points before moving on.`
+        : "There is not enough note content to suggest a confident next step yet.",
+    },
+    {
+      title: "Practise the key concept",
+      description: meaningfulNotes.length
+        ? "Apply the main topic in a short example or exercise so the idea is easier to remember."
+        : "Add a few more meaningful notes so a more specific recommendation can be made.",
+    },
+  ];
 
   return {
-    shortSummary: summaryText
-      ? `The most useful next step is to review and practice the ideas in ${summaryText}.`
-      : "Not enough information was recorded in this session to suggest a useful next step.",
-    keyTakeaways: meaningfulNotes
-      .slice(0, 3)
-      .map((noteText) => (noteText.length > 160 ? `${noteText.slice(0, 160)}...` : noteText)),
-    actionItems: meaningfulNotes.length
-      ? ["Review the main concepts from these notes and test yourself on them."]
-      : [],
-    topicsToRevise: meaningfulNotes.length
-      ? ["Revisit the key ideas and clarify anything you are unsure about."]
-      : [],
+    suggestions: meaningfulNotes.length ? fallbackSuggestions : [],
+    basedOn,
   };
 }
 
@@ -172,25 +157,27 @@ async function getNotesForSummary(sessionId, userId) {
   );
 
   if (notesResult.rowCount) {
-    return { notes: notesResult.rows, sourceSessionId: sessionId, source: "current" };
+    return { notes: notesResult.rows, source: "current" };
   }
 
-  const lastSessionResult = await client.query(
-    `SELECT s.id, s.user_id, s.session_num, s.started_at
+  const previousSessionResult = await client.query(
+    `SELECT s.id
      FROM sessions s
+     JOIN notes n ON n.session_id = s.id
      WHERE s.user_id = $1
        AND s.id != $2
+     GROUP BY s.id
      ORDER BY s.started_at DESC, s.id DESC
      LIMIT 1`,
     [userId, sessionId],
   );
 
-  if (!lastSessionResult.rowCount) {
-    return { notes: [], sourceSessionId: null, source: "none" };
+  if (!previousSessionResult.rowCount) {
+    return { notes: [], source: "none" };
   }
 
-  const lastSessionId = lastSessionResult.rows[0].id;
-  const lastSessionNotesResult = await client.query(
+  const previousSessionId = previousSessionResult.rows[0].id;
+  const previousSessionNotesResult = await client.query(
     `SELECT n.id, n.title, n.summary, n.session_num, n.pomodoro_num, n.created_at,
             COALESCE(
               json_agg(
@@ -204,13 +191,12 @@ async function getNotesForSummary(sessionId, userId) {
      WHERE n.session_id = $1
      GROUP BY n.id
      ORDER BY n.created_at ASC`,
-    [lastSessionId],
+    [previousSessionId],
   );
 
   return {
-    notes: lastSessionNotesResult.rows || [],
-    sourceSessionId: lastSessionId,
-    source: "last",
+    notes: previousSessionNotesResult.rows || [],
+    source: "previous",
   };
 }
 
@@ -225,10 +211,7 @@ export async function POST(request) {
     const parsed = summaryRequestSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid request payload" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
     }
 
     const sessionId = parsed.data.sessionId.toString();
@@ -236,7 +219,10 @@ export async function POST(request) {
 
     if (!targetNotes.notes.length) {
       return NextResponse.json(
-        { message: "No notes found for this session yet, so we used the most recent available session instead." },
+        {
+          message: "No study notes available yet. Add some notes to get personalized suggestions.",
+          basedOn: "none",
+        },
         { status: 200 },
       );
     }
@@ -246,7 +232,11 @@ export async function POST(request) {
     const model = usesGemini ? "gemini-2.0-flash" : process.env.GROK_MODEL || "grok-2-latest";
 
     if (!geminiApiKey) {
-      return NextResponse.json(buildFallbackSummary(targetNotes.notes));
+      const fallback = buildFallbackSummary(targetNotes.notes, targetNotes.source);
+      return NextResponse.json({
+        suggestions: fallback.suggestions,
+        basedOn: fallback.basedOn,
+      });
     }
 
     let completion;
@@ -262,7 +252,7 @@ export async function POST(request) {
               systemInstruction: {
                 parts: [
                   {
-                    text: "You are a study-session summarizer. Analyze the student's notes and create a useful revision summary based ONLY on the information provided. Do not simply repeat or rephrase note titles. Identify what was actually learned, important concepts, topics that may need revision, and reasonable next steps. Do not invent information.",
+                    text: "You are a study assistant. Based on the student's study notes, suggest useful and specific next steps. Identify concepts worth practising, topics to explore further, relevant exercises, and areas that may need revision. Make suggestions directly relevant to the provided notes. Do not merely summarize or rephrase the notes. Do not invent information or assume the student has mastered a concept. If the notes contain insufficient information, acknowledge this and provide only suggestions that are reasonably supported by the available information.",
                   },
                 ],
               },
@@ -274,26 +264,24 @@ export async function POST(request) {
               ],
               generationConfig: {
                 temperature: 0.2,
-                maxOutputTokens: 800,
+                maxOutputTokens: 700,
                 responseMimeType: "application/json",
                 responseSchema: {
                   type: "OBJECT",
                   properties: {
-                    shortSummary: { type: "STRING" },
-                    keyTakeaways: {
+                    suggestions: {
                       type: "ARRAY",
-                      items: { type: "STRING" },
-                    },
-                    actionItems: {
-                      type: "ARRAY",
-                      items: { type: "STRING" },
-                    },
-                    topicsToRevise: {
-                      type: "ARRAY",
-                      items: { type: "STRING" },
+                      items: {
+                        type: "OBJECT",
+                        properties: {
+                          title: { type: "STRING" },
+                          description: { type: "STRING" },
+                        },
+                        required: ["title", "description"],
+                      },
                     },
                   },
-                  required: ["shortSummary", "keyTakeaways", "actionItems", "topicsToRevise"],
+                  required: ["suggestions"],
                 },
               },
             }),
@@ -309,11 +297,11 @@ export async function POST(request) {
           body: JSON.stringify({
             model,
             temperature: 0.3,
-            max_tokens: 800,
+            max_tokens: 700,
             messages: [
               {
                 role: "system",
-                content: "You are a study-session summarizer. Analyze the student's notes and create a useful revision summary based ONLY on the information provided. Do not simply repeat or rephrase note titles. Identify what was actually learned, important concepts, topics that may need revision, and reasonable next steps. Do not invent information.",
+                content: "You are a study assistant. Based on the student's study notes, suggest useful and specific next steps. Identify concepts worth practising, topics to explore further, relevant exercises, and areas that may need revision. Make suggestions directly relevant to the provided notes. Do not merely summarize or rephrase the notes. Do not invent information or assume the student has mastered a concept. If the notes contain insufficient information, acknowledge this and provide only suggestions that are reasonably supported by the available information.",
               },
               {
                 role: "user",
@@ -325,13 +313,15 @@ export async function POST(request) {
       }
     } catch (error) {
       console.error("AI summary request failed:", error);
-      return NextResponse.json(buildFallbackSummary(targetNotes.notes));
+      const fallback = buildFallbackSummary(targetNotes.notes, targetNotes.source);
+      return NextResponse.json({ suggestions: fallback.suggestions, basedOn: fallback.basedOn });
     }
 
     if (!completion.ok) {
       const errorText = await completion.text();
       console.error("AI summary request failed:", errorText);
-      return NextResponse.json(buildFallbackSummary(targetNotes.notes));
+      const fallback = buildFallbackSummary(targetNotes.notes, targetNotes.source);
+      return NextResponse.json({ suggestions: fallback.suggestions, basedOn: fallback.basedOn });
     }
 
     try {
@@ -343,22 +333,19 @@ export async function POST(request) {
         : data?.choices?.[0]?.message?.content || "{}";
 
       const result = parseModelResponse(text);
+      const suggestions = result.suggestions.length ? result.suggestions : buildFallbackSummary(targetNotes.notes, targetNotes.source).suggestions;
 
       return NextResponse.json({
-        shortSummary: result.shortSummary || "Not enough information was recorded in this session to generate a detailed summary.",
-        keyTakeaways: Array.isArray(result.keyTakeaways) ? result.keyTakeaways : [],
-        actionItems: Array.isArray(result.actionItems) ? result.actionItems : [],
-        topicsToRevise: Array.isArray(result.topicsToRevise) ? result.topicsToRevise : [],
+        suggestions,
+        basedOn: targetNotes.source,
       });
     } catch (error) {
       console.error("AI summary response parsing failed:", error);
-      return NextResponse.json(buildFallbackSummary(targetNotes.notes));
+      const fallback = buildFallbackSummary(targetNotes.notes, targetNotes.source);
+      return NextResponse.json({ suggestions: fallback.suggestions, basedOn: fallback.basedOn });
     }
   } catch (error) {
     console.error("AI summary route error:", error);
-    return NextResponse.json(
-      { error: "Unable to generate summary right now" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Unable to generate summary right now" }, { status: 500 });
   }
 }
