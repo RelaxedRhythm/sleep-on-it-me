@@ -89,9 +89,9 @@ function TimerDisplay({
 
 export default function Pomodoro({bookId,userId,sessionId,setSessionId,pomodoro,setPomodoro,session,setSessions , todos}) {
   const timers = {
-    shortBreak: 5,
-    longBreak: 15,
-    study: 10,
+    shortBreak: 300,
+    longBreak: 30*60,
+    study: 25*60,
   };
   // console.log("pomodoro rendered", bookId, userId);
   const [mode, setMode] = useState("study"); // shortbreak || longbreak
