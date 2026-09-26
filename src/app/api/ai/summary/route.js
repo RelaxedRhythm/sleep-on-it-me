@@ -110,34 +110,6 @@ function parseModelResponse(content) {
   };
 }
 
-function buildFallbackSummary(notes, basedOn = "current") {
-  const cleanedNotes = Array.isArray(notes) ? notes : [];
-  const meaningfulNotes = cleanedNotes
-    .map((note) => getMeaningfulNoteText(note))
-    .map((text) => normalizeText(text))
-    .filter(Boolean);
-
-  const fallbackSuggestions = [
-    {
-      title: "Review the main ideas",
-      description: meaningfulNotes.length
-        ? `Revisit the core ideas in the notes and check the most important points before moving on.`
-        : "There is not enough note content to suggest a confident next step yet.",
-    },
-    {
-      title: "Practise the key concept",
-      description: meaningfulNotes.length
-        ? "Apply the main topic in a short example or exercise so the idea is easier to remember."
-        : "Add a few more meaningful notes so a more specific recommendation can be made.",
-    },
-  ];
-
-  return {
-    suggestions: meaningfulNotes.length ? fallbackSuggestions : [],
-    basedOn,
-  };
-}
-
 async function getNotesForSummary(sessionId, userId) {
   const notesResult = await client.query(
     `SELECT n.id, n.title, n.summary, n.session_num, n.pomodoro_num, n.created_at,
@@ -150,10 +122,12 @@ async function getNotesForSummary(sessionId, userId) {
             ) AS key_value_pairs
      FROM notes n
      LEFT JOIN note_details nd ON nd.note_id = n.id
+     JOIN sessions s ON s.id = n.session_id
      WHERE n.session_id = $1
+       AND s.user_id = $2
      GROUP BY n.id
      ORDER BY n.created_at ASC`,
-    [sessionId],
+    [sessionId, userId],
   );
 
   if (notesResult.rowCount) {
@@ -232,12 +206,25 @@ export async function POST(request) {
     const model = usesGemini ? "gemini-2.0-flash" : process.env.GROK_MODEL || "grok-2-latest";
 
     if (!geminiApiKey) {
-      const fallback = buildFallbackSummary(targetNotes.notes, targetNotes.source);
-      return NextResponse.json({
-        suggestions: fallback.suggestions,
-        basedOn: fallback.basedOn,
-      });
+      console.error("[AI Suggestions] No Gemini API key configured.");
+      return NextResponse.json(
+        { error: "Unable to generate AI suggestions right now." },
+        { status: 500 },
+      );
     }
+
+    const prompt = buildPrompt(targetNotes.notes);
+    console.log("[AI Suggestions] Sending notes to Gemini", {
+      sessionId,
+      source: targetNotes.source,
+      noteCount: targetNotes.notes.length,
+      notes: targetNotes.notes.map((note) => ({
+        id: note.id,
+        title: note.title,
+        summary: note.summary,
+        key_value_pairs: Array.isArray(note.key_value_pairs) ? note.key_value_pairs : [],
+      })),
+    });
 
     let completion;
 
@@ -259,7 +246,7 @@ export async function POST(request) {
               contents: [
                 {
                   role: "user",
-                  parts: [{ text: buildPrompt(targetNotes.notes) }],
+                  parts: [{ text: prompt }],
                 },
               ],
               generationConfig: {
@@ -305,23 +292,31 @@ export async function POST(request) {
               },
               {
                 role: "user",
-                content: buildPrompt(targetNotes.notes),
+                content: prompt,
               },
             ],
           }),
         });
       }
     } catch (error) {
-      console.error("AI summary request failed:", error);
-      const fallback = buildFallbackSummary(targetNotes.notes, targetNotes.source);
-      return NextResponse.json({ suggestions: fallback.suggestions, basedOn: fallback.basedOn });
+      console.error("[AI Suggestions] Gemini request failed:", error);
+      return NextResponse.json(
+        { error: "Unable to generate AI suggestions right now." },
+        { status: 500 },
+      );
     }
 
     if (!completion.ok) {
       const errorText = await completion.text();
-      console.error("AI summary request failed:", errorText);
-      const fallback = buildFallbackSummary(targetNotes.notes, targetNotes.source);
-      return NextResponse.json({ suggestions: fallback.suggestions, basedOn: fallback.basedOn });
+      console.error("[AI Suggestions] Gemini HTTP error:", {
+        status: completion.status,
+        statusText: completion.statusText,
+        responseBody: errorText?.slice(0, 2000),
+      });
+      return NextResponse.json(
+        { error: "Unable to generate AI suggestions right now." },
+        { status: 500 },
+      );
     }
 
     try {
@@ -332,17 +327,34 @@ export async function POST(request) {
             .join("") || "{}"
         : data?.choices?.[0]?.message?.content || "{}";
 
+      if (usesGemini && (!data?.candidates || !Array.isArray(data.candidates))) {
+        console.error("[AI Suggestions] Gemini response missing candidates:", data);
+        return NextResponse.json(
+          { error: "Unable to generate AI suggestions right now." },
+          { status: 500 },
+        );
+      }
+
       const result = parseModelResponse(text);
-      const suggestions = result.suggestions.length ? result.suggestions : buildFallbackSummary(targetNotes.notes, targetNotes.source).suggestions;
+
+      if (!result.suggestions.length) {
+        console.error("[AI Suggestions] Gemini returned no usable suggestions:", text?.slice?.(0, 2000));
+        return NextResponse.json(
+          { error: "Unable to generate AI suggestions right now." },
+          { status: 500 },
+        );
+      }
 
       return NextResponse.json({
-        suggestions,
+        suggestions: result.suggestions,
         basedOn: targetNotes.source,
       });
     } catch (error) {
-      console.error("AI summary response parsing failed:", error);
-      const fallback = buildFallbackSummary(targetNotes.notes, targetNotes.source);
-      return NextResponse.json({ suggestions: fallback.suggestions, basedOn: fallback.basedOn });
+      console.error("[AI Suggestions] Gemini response parsing failed:", error);
+      return NextResponse.json(
+        { error: "Unable to generate AI suggestions right now." },
+        { status: 500 },
+      );
     }
   } catch (error) {
     console.error("AI summary route error:", error);
