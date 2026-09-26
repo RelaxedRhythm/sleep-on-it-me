@@ -203,10 +203,16 @@ export async function POST(request) {
 
     const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GROK_API_KEY || process.env.XAI_API_KEY;
     const usesGemini = Boolean(process.env.GEMINI_API_KEY);
-    const model = usesGemini ? "gemini-2.0-flash" : process.env.GROK_MODEL || "grok-2-latest";
+    const provider = usesGemini ? "Gemini" : "Grok";
+    const model = usesGemini ? "gemini-3.8-flash" : process.env.GROK_MODEL || "grok-2-latest";
+
+    console.log("[AI Suggestions] Using provider/model", {
+      provider,
+      model,
+    });
 
     if (!geminiApiKey) {
-      console.error("[AI Suggestions] No Gemini API key configured.");
+      console.error("[AI Suggestions] No API key configured for provider.", { provider, model });
       return NextResponse.json(
         { error: "Unable to generate AI suggestions right now." },
         { status: 500 },
@@ -214,7 +220,9 @@ export async function POST(request) {
     }
 
     const prompt = buildPrompt(targetNotes.notes);
-    console.log("[AI Suggestions] Sending notes to Gemini", {
+    console.log("[AI Suggestions] Sending notes to provider", {
+      provider,
+      model,
       sessionId,
       source: targetNotes.source,
       noteCount: targetNotes.notes.length,
@@ -308,7 +316,9 @@ export async function POST(request) {
 
     if (!completion.ok) {
       const errorText = await completion.text();
-      console.error("[AI Suggestions] Gemini HTTP error:", {
+      console.error("[AI Suggestions] Provider HTTP error:", {
+        provider,
+        model,
         status: completion.status,
         statusText: completion.statusText,
         responseBody: errorText?.slice(0, 2000),
